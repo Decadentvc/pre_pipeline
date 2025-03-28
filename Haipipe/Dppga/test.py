@@ -31,7 +31,7 @@ OPERATOR_LIBRARY = {
         }
     },
     
-    # 归一化（保持不变）
+    # 归一化
     "Normalization(N)": {
         "Standard Scaler": {
             "constructor": StandardScaler,
@@ -61,7 +61,7 @@ OPERATOR_LIBRARY = {
         }
     },
     
-    # 离散化（保持不变）
+    # 离散化
     "Discretization(D)": {
         "KBins": {
             "constructor": KBinsDiscretizer,
@@ -79,7 +79,7 @@ OPERATOR_LIBRARY = {
         }
     },
     
-    # 插补（保持不变）
+    # 插补
     "Imputation(I)": {
         "Univariate": {
             "constructor": SimpleImputer,
@@ -96,7 +96,7 @@ OPERATOR_LIBRARY = {
         }
     },
     
-    # 重新平衡（保持不变）
+    # 重新平衡
     "Rebalancing(R)": {
         "Near Miss": {
             "constructor": NearMiss,
@@ -114,7 +114,7 @@ OPERATOR_LIBRARY = {
         }
     },
     
-    # 特征工程（保持不变）
+    # 特征工程
     "Feat.Eng.(F)": {
         "PCA": {
             "constructor": PCA,
@@ -162,7 +162,7 @@ def build_pipeline(proto_steps, best_params):
                 valid_params = {k: v for k, v in op_params.items() if k in ["handle_unknown", "drop"]}
                 transformer = OneHotEncoder(**valid_params)
             elif op_name == "Ordinal":
-                valid_params = {}  # 旧版本无参数
+                valid_params = {}  
                 transformer = OrdinalEncoder(**valid_params)
 
         elif step == "N":
@@ -230,25 +230,17 @@ def build_pipeline(proto_steps, best_params):
     return Pipeline(steps)  
 
 def optimization_objective(params, proto_steps, X, y):
-    """优化目标函数：评估管道性能"""
-    try:
-        # 1. 构建完整管道
+    # try:
         pipeline = build_pipeline(proto_steps, params)
-        
-        # 2. 添加分类器（可配置）
         full_pipeline = Pipeline([
             ('preprocessing', pipeline),
             ('classifier', RandomForestClassifier(n_estimators=100))
         ])
-        
-        # 3. 交叉验证评估
-        score = cross_val_score(full_pipeline, X, y, 
-                               cv=3, scoring='f1_weighted').mean()
-        return {'loss': -score, 'status': STATUS_OK}
-    
-    except Exception as e:
-        print(f"Invalid configuration: {e}")
-        return {'loss': 0, 'status': STATUS_OK}
+        score = cross_val_score(full_pipeline, X, y, cv=3, scoring='accuracy').mean()
+        return {'loss': 1 - score, 'status': STATUS_OK}  
+    # except Exception as e:
+    #     print(f"Error: {str(e)}")  
+    #     return {'loss': 1.0, 'status': STATUS_OK}
 
 def optimize_pipeline_prototype(proto_steps, X, y, max_evals=50):
     """主优化函数"""
@@ -296,29 +288,32 @@ def optimize_pipeline_prototype(proto_steps, X, y, max_evals=50):
                 best_params[step]['params'][param] = int(val)
     
     return {
-        "best_score": -trials.best_trial['result']['loss'],
+        "best_score": trials.best_trial['result']['loss'],  
         "best_params": best_params,
         "best_pipeline": build_pipeline(proto_steps, best_params)
     }
 
 # 示例用法
 if __name__ == "__main__":
-    # 假设输入原型为 ['I', 'E', 'N', 'R', 'F']
+
     prototype = ['I', 'E', 'N', 'R', 'F']
     
-    # 加载数据集（示例）
+    # 加载数据集
     from sklearn.datasets import fetch_openml
     from sklearn.model_selection import train_test_split
     from sklearn.preprocessing import LabelEncoder
+    import pandas as pd
+    from sklearn.datasets import load_breast_cancer
     
-    # 加载并预处理数据
-    X, y = fetch_openml("titanic", version=1, as_frame=True, return_X_y=True)
-    X = X.drop(['body', 'cabin', 'boat', 'home.dest'], axis=1)
-    X = X.select_dtypes(include=['number'])
-    y = LabelEncoder().fit_transform(y)
+    # 加载乳腺癌数据集
+    data = load_breast_cancer()
+    X = pd.DataFrame(data.data, columns=data.feature_names)
+    y = data.target  # 0: 恶性, 1: 良性
     
     # 划分训练集
-    X_train, _, y_train, _ = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, stratify=y, random_state=42
+    )
     
     # 运行优化
     result = optimize_pipeline_prototype(
@@ -328,7 +323,7 @@ if __name__ == "__main__":
         max_evals=30
     )
     
-    print(f"Best F1 Score: {result['best_score']:.4f}")
+    print(f"Best Accuracy: {result['best_score']:.4f}")
     print("Best Pipeline Steps:")
     for name, step in result['best_pipeline'].steps:
         print(f"{name}: {step}")
