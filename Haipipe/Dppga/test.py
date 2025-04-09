@@ -1,5 +1,5 @@
 from hyperopt import fmin, tpe, hp, Trials, space_eval, STATUS_OK
-from imblearn.pipeline import Pipeline 
+from imblearn.pipeline import Pipeline as ImbPipeline 
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import SimpleImputer, IterativeImputer
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler, RobustScaler
@@ -8,6 +8,10 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.decomposition import PCA
 from imblearn.under_sampling import NearMiss
 from imblearn.over_sampling import SMOTE
+from hyperopt import fmin, tpe, hp, Trials, space_eval, STATUS_OK
+from imblearn.pipeline import Pipeline as ImbPipeline
+from sklearn.base import clone
+import sys
 import numpy as np
 
 # 假设已有数据集和ML算法（以分类任务为例）
@@ -25,9 +29,12 @@ OPERATOR_LIBRARY = {
                 "drop": hp.choice("E_drop", [None, "first"])
             }
         },
-        "Ordinal": {
+        "Ordinal（兼容版）": { 
             "constructor": OrdinalEncoder,
-            "params": {}  # 移除无效参数
+            "params": {
+                # 版本检测参数
+                "encoded_missing_value": hp.choice("E_missing_value", [-1, -999]) if hasattr(OrdinalEncoder, 'handle_unknown') else {}
+            }
         }
     },
     
@@ -129,16 +136,6 @@ OPERATOR_LIBRARY = {
                 "k": hp.quniform("F_kbest", 5, 30, 5)
             }
         },
-        "PCA + Select K Best": {
-            "constructor": lambda**kwargs: Pipeline([
-                ('pca', PCA(n_components=kwargs['pca_n'])),
-                ('select', SelectKBest(k=kwargs['select_k']))
-            ]),
-            "params": {
-                "pca_n": hp.uniform("F_comb_pca", 0.5, 0.9),
-                "select_k": hp.quniform("F_comb_k", 5, 20, 5)
-            }
-        }
     }
 }
 
@@ -148,99 +145,158 @@ def build_pipeline(proto_steps, best_params):
         step_config = best_params[step]
         op_name = step_config['operator']
         op_params = step_config['params']
-        
+
+        # 辅助函数：转换整数参数
+        def to_int(value):
+            return int(value) if isinstance(value, float) else value
+
+        # 统一处理整数参数转换
         if step == "I":
             if op_name == "Univariate":
-                valid_params = {k: v for k, v in op_params.items() if k == "strategy"}
-                transformer = SimpleImputer(**valid_params)
+                transformer = SimpleImputer(strategy=op_params.get("strategy", "mean"))
             elif op_name == "Multivariate":
-                valid_params = {k: v for k, v in op_params.items() if k in ["initial_strategy", "order"]}
-                transformer = IterativeImputer(**valid_params)
+                transformer = IterativeImputer(
+                    initial_strategy=op_params.get("initial_strategy", "mean"),
+                    n_nearest_features=to_int(op_params.get("n_nearest_features", 5))
+                )
 
         elif step == "E":
             if op_name == "One Hot":
-                valid_params = {k: v for k, v in op_params.items() if k in ["handle_unknown", "drop"]}
+                # 保持原有逻辑
+                valid_params = {
+                    "handle_unknown": op_params.get("handle_unknown", "ignore"),
+                    "drop": op_params.get("drop", None)
+                }
                 transformer = OneHotEncoder(**valid_params)
-            elif op_name == "Ordinal":
-                valid_params = {}  
-                transformer = OrdinalEncoder(**valid_params)
+            else:
+                # 新版兼容处理
+                if hasattr(OrdinalEncoder, 'handle_unknown'):  # 新版本特性检测
+                    valid_params = {
+                        "handle_unknown": "use_encoded_value",
+                        "unknown_value": op_params.get("encoded_missing_value", -1)
+                    }
+                else:  # 旧版本回退方案
+                    valid_params = {
+                        "handle_unknown": "ignore"  # 虽然旧版本不支持，但后续添加安全机制
+                    }
+                # 创建带安全机制的编码器
+                transformer = SafeOrdinalEncoder(**valid_params)
 
         elif step == "N":
             if op_name == "Standard Scaler":
-                valid_params = {k: v for k, v in op_params.items() if k in ["with_mean", "with_std"]}
+                valid_params = {
+                    "with_mean": op_params.get("with_mean", True),
+                    "with_std": op_params.get("with_std", True)
+                }
                 transformer = StandardScaler(**valid_params)
             elif op_name == "Power Transform":
-                valid_params = {k: v for k, v in op_params.items() if k in ["method", "standardize"]}
+                valid_params = {
+                    "method": op_params.get("method", "yeo-johnson"),
+                    "standardize": op_params.get("standardize", True)
+                }
                 transformer = PowerTransformer(**valid_params)
             elif op_name == "MinMax Scaler":
-                valid_params = {k: v for k, v in op_params.items() if k == "feature_range"}
+                valid_params = {"feature_range": op_params.get("feature_range", (0, 1))}
                 transformer = MinMaxScaler(**valid_params)
             elif op_name == "Robust Scaler":
-                valid_params = {k: v for k, v in op_params.items() if k == "quantile_range"}
+                valid_params = {"quantile_range": op_params.get("quantile_range", (25.0, 75.0))}
                 transformer = RobustScaler(**valid_params)
 
         elif step == "D":
             if op_name == "KBins":
                 valid_params = {
-                    "n_bins": int(op_params.get("n_bins", 5)),
+                    "n_bins": _ensure_int(op_params.get("n_bins", 5)),
                     "encode": op_params.get("encode", "ordinal"),
                     "strategy": op_params.get("strategy", "quantile")
                 }
                 transformer = KBinsDiscretizer(**valid_params)
             elif op_name == "Binarization":
-                valid_params = {k: v for k, v in op_params.items() if k == "threshold"}
+                valid_params = {"threshold": op_params.get("threshold", 0.5)}
                 transformer = Binarizer(**valid_params)
 
-        elif step == "R":
+        elif step == "R":  
             if op_name == "Near Miss":
-                valid_params = {
-                    "version": int(op_params.get("version", 3)),
-                    "n_neighbors": int(op_params.get("n_neighbors", 3))
-                }
-                transformer = NearMiss(**valid_params)
-            elif op_name == "SMOTE":
-                valid_params = {
-                    "k_neighbors": int(op_params.get("k_neighbors", 5)),
-                    "sampling_strategy": op_params.get("sampling_strategy", "auto")
-                }
-                transformer = SMOTE(**valid_params)
+                transformer = NearMiss(
+                    version=to_int(op_params.get("version", 3)),
+                    n_neighbors=to_int(op_params.get("n_neighbors", 3))
+                )
+            else:
+                transformer = SMOTE(
+                    k_neighbors=to_int(op_params.get("k_neighbors", 5)),
+                    sampling_strategy=op_params.get("sampling_strategy", "auto")
+                )
 
         elif step == "F":
             if op_name == "PCA":
-                valid_params = {
-                    "n_components": min(op_params.get("n_components", 0.9), 0.95),
-                    "svd_solver": op_params.get("svd_solver", "auto")
-                }
-                transformer = PCA(**valid_params)
-            elif op_name == "Select K Best":
-                valid_params = {"k": int(op_params.get("k", 10))}
-                transformer = SelectKBest(**valid_params)
-            elif op_name == "PCA + Select K Best":
-                valid_params = {
-                    "pca_n": min(op_params.get("pca_n", 0.8), 0.9),
-                    "select_k": int(op_params.get("select_k", 10))
-                }
-                transformer = Pipeline([
-                    ('pca', PCA(n_components=valid_params["pca_n"])),
-                    ('select', SelectKBest(k=valid_params["select_k"]))
-                ])
+                transformer = PCA(
+                    n_components=min(op_params.get("n_components", 0.9), 0.95),
+                    svd_solver=op_params.get("svd_solver", "auto")
+                )
+            else:
+                transformer = SelectKBest(k=to_int(op_params.get("k", 10)))
 
         steps.append((f"{step}_{op_name}", transformer))
     
-    return Pipeline(steps)  
+    return ImbPipeline(steps) 
 
 def optimization_objective(params, proto_steps, X, y):
-    # try:
-        pipeline = build_pipeline(proto_steps, params)
-        full_pipeline = Pipeline([
-            ('preprocessing', pipeline),
-            ('classifier', RandomForestClassifier(n_estimators=100))
-        ])
+    try:
+        # 深拷贝参数防止污染
+        safe_params = {k: dict(v) for k, v in params.items()}
+        
+        # 动态参数修正
+        for step in proto_steps:
+            if step == "F" and safe_params[step]['operator'] == "Select K Best":
+                safe_params[step]['params']['k'] = min(
+                    int(safe_params[step]['params']['k']), 
+                    X.shape[1]
+                )
+            if step == "R" and safe_params[step]['operator'] == "SMOTE":
+                min_class = min(np.bincount(y))
+                safe_params[step]['params']['k_neighbors'] = min(
+                    int(safe_params[step]['params']['k_neighbors']),
+                    min_class - 1
+                )
+        
+        pipeline = build_pipeline(proto_steps, safe_params)
+        full_pipeline = clone(pipeline).set_params(
+            classifier=RandomForestClassifier(n_estimators=100)
+        )
+        
         score = cross_val_score(full_pipeline, X, y, cv=3, scoring='accuracy').mean()
-        return {'loss': 1 - score, 'status': STATUS_OK}  
-    # except Exception as e:
-    #     print(f"Error: {str(e)}")  
-    #     return {'loss': 1.0, 'status': STATUS_OK}
+        return {'loss': 1 - score, 'status': STATUS_OK}
+    
+    except Exception as e:
+        print(f"Error: {str(e)}", file=sys.stderr)
+        return {'loss': 1.0, 'status': STATUS_OK}
+
+from sklearn.base import BaseEstimator, TransformerMixin
+
+class SafeOrdinalEncoder(BaseEstimator, TransformerMixin):
+    """带未知值处理的OrdinalEncoder兼容版"""
+    def __init__(self, handle_unknown='ignore', unknown_value=-1):
+        self.handle_unknown = handle_unknown
+        self.unknown_value = unknown_value
+        self.encoder = OrdinalEncoder() if not hasattr(OrdinalEncoder, 'handle_unknown') else \
+                      OrdinalEncoder(handle_unknown=handle_unknown, unknown_value=unknown_value)
+        self.categories_ = None
+
+    def fit(self, X, y=None):
+        self.encoder.fit(X, y)
+        self.categories_ = self.encoder.categories_
+        return self
+
+    def transform(self, X):
+        try:
+            return self.encoder.transform(X)
+        except ValueError as e:
+            if "Found unknown categories" in str(e) and not hasattr(OrdinalEncoder, 'handle_unknown'):
+                # 旧版本兼容处理：将未知值替换为特殊编码
+                X_trans = self.encoder.transform(X)
+                mask = np.isnan(X_trans)
+                X_trans[mask] = self.unknown_value
+                return X_trans.astype(int)
+            raise
 
 def optimize_pipeline_prototype(proto_steps, X, y, max_evals=50):
     """主优化函数"""
@@ -255,29 +311,35 @@ def optimize_pipeline_prototype(proto_steps, X, y, max_evals=50):
             'F': "Feat.Eng.(F)"
         }[step]
         
-        # 获取该步骤的所有操作符
-        operators = list(OPERATOR_LIBRARY[step_type].keys())
-        num_ops = len(operators)
+        operators = []
+        for op in OPERATOR_LIBRARY[step_type]:
+            # 版本兼容性过滤
+            if step == 'E' and "Ordinal（新版）" in op:
+                if not hasattr(OrdinalEncoder, 'handle_unknown'):
+                    continue
+            operators.append(op)
         
-        # 确保每个操作符被选中的概率相等且总和为1.0
         space[step] = {
             'operator': hp.choice(f"{step}_operator", operators),
             'params': hp.pchoice(
                 f"{step}_op_params",
-                [(1.0 / num_ops, OPERATOR_LIBRARY[step_type][op]['params']) 
+                [(1.0 / len(operators), OPERATOR_LIBRARY[step_type][op]['params']) 
                  for op in operators]
             )
         }
     
-    # 运行优化
     trials = Trials()
-    best = fmin(
-        fn=lambda params: optimization_objective(params, proto_steps, X, y),
-        space=space,
-        algo=tpe.suggest,
-        max_evals=max_evals,
-        trials=trials
-    )
+    try:
+        best = fmin(
+            fn=lambda params: optimization_objective(params, proto_steps, X, y),
+            space=space,
+            algo=tpe.suggest,
+            max_evals=max_evals,
+            trials=trials,
+            catch_eval_exceptions=True  # 关键参数：捕获评估异常
+        )
+    except AllTrialsFailed:
+        raise RuntimeError("所有试验失败，请检查：1.数据质量 2.参数空间定义 3.预处理逻辑")
     
     # 解码最佳参数并后处理
     best_params = space_eval(space, best)
