@@ -16,7 +16,6 @@ from sklearn.decomposition import PCA
 from sklearn.feature_selection import SelectKBest
 from imblearn.under_sampling import NearMiss
 from imblearn.over_sampling import SMOTE
-from imblearn.pipeline import Pipeline as ImbPipeline
 from functools import partial
 
 class PrototypeSingleton:
@@ -162,10 +161,12 @@ class PipelineOptimizer:
         pipeline_steps = []
         if transformers:
             pipeline_steps.append(('preprocessing', ColumnTransformer(transformers, remainder='drop')))
+        
         for step_id, processor in global_steps:
             pipeline_steps.append((step_id, processor))
+        
         pipeline_steps.append(('classifier', self.model))
-        return ImbPipeline(pipeline_steps), step_mapping 
+        return Pipeline(pipeline_steps), step_mapping
 
     def _generate_param_grid(self, combo, step_mapping):
         """生成参数网格（基于完整前缀）"""
