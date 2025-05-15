@@ -1,31 +1,56 @@
 import numpy as np
-import pandas as pd
-from sklearn.base import BaseEstimator, TransformerMixin, clone
+import optuna
+from tqdm import tqdm
+from sklearn.base import clone, BaseEstimator, TransformerMixin
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import cross_val_score
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import SimpleImputer, IterativeImputer
 from sklearn.preprocessing import (
     StandardScaler, RobustScaler, MinMaxScaler,
     PowerTransformer, KBinsDiscretizer, Binarizer,
-    OneHotEncoder, OrdinalEncoder, FunctionTransformer
+    OneHotEncoder
 )
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import SelectKBest
+from sklearn.pipeline import FeatureUnion
+from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.under_sampling import NearMiss
 from imblearn.over_sampling import SMOTE
-from imblearn.pipeline import make_pipeline as make_imb_pipeline
-import itertools
+from functools import partial
+import warnings
+
+warnings.filterwarnings('ignore', category=UserWarning)
+
+class ResampleWrapper(BaseEstimator):
+    def __init__(self, resampler):
+        self.resampler = resampler
+        
+    def fit(self, X, y):
+        return self
+    
+    def fit_resample(self, X, y):
+        return self.resampler.fit_resample(X, y)
+
+class TransformWrapper(BaseEstimator):
+    def __init__(self, transformer):
+        self.transformer = transformer
+        
+    def fit(self, X, y=None):
+        self.transformer.fit(X, y)
+        return self
+    
+    def transform(self, X, y=None):
+        return self.transformer.transform(X)
 
 class PrototypeSingleton:
-    """Singleton管理预处理流程和特征状态"""
     _instance = None
     POOL = {
         "impute": [None, SimpleImputer(), IterativeImputer()],
-        "encode": [None, OneHotEncoder()],
-        "rebalance": [None, NearMiss(), SMOTE()],
+        "encode": [None, OneHotEncoder(sparse_output=False, handle_unknown='ignore')],
+        "rebalance": [None, NearMiss(version=1), SMOTE()],
         "normalize": [
             None, StandardScaler(),
             PowerTransformer(), MinMaxScaler(), RobustScaler()
@@ -37,14 +62,33 @@ class PrototypeSingleton:
         ],
     }
     
-    def __init__(self):
-        self.parts = []
-        self.X = None
-        self.y = None
-        self.num_features = []
-        self.cat_features = []
-        self.current_num = []
-        self.current_cat = []
+    PARAM_GRIDS = {
+        "impute": {
+            SimpleImputer: {"strategy": ["most_frequent"]},
+            IterativeImputer: {"initial_strategy": ['most_frequent', 'constant'], "imputation_order": ['ascending', 'descending', 'roman', 'arabic', 'random']}
+        },
+        "encode":{OneHotEncoder:{}},
+        "rebalance":{
+            NearMiss:{"n_neighbors": (1, 3)},
+            SMOTE:{"k_neighbors": (5, 7)}
+        },
+        "normalize": {
+            StandardScaler: {"with_mean": [True, False], "with_std": [True, False]},
+            RobustScaler: {"quantile_range":[(25.0, 75.0),(10.0, 90.0), (5.0, 95.0)],"with_centering": [True, False], "with_scaling": [True, False]}
+        },
+        "discretize":{
+            KBinsDiscretizer:{"n_bins":[3, 5, 7],"encode": ['onehot', 'onehot-dense', 'ordinal'],"strategy": ['uniform', 'quantile', 'kmeans']},
+            Binarizer:{"threshold":[0.0, 0.5, 2.0, 5.0]}
+        },
+        "features": {
+            PCA: {"n_components":[1, 2, 3, 4]},
+            SelectKBest: {"k": [1, 2, 3, 4]},
+            FeatureUnion: {
+                "pca__n_components": [1, 2, 3, 4],
+                "selectkbest__k": [1, 2, 3, 4]
+            }
+        }
+    }
 
     @classmethod
     def get_instance(cls):
@@ -52,181 +96,245 @@ class PrototypeSingleton:
             cls._instance = cls()
         return cls._instance
 
-    def configure(self, steps, X, y, num_features, cat_features):
-        self.parts = steps
-        self.X = X
-        self.y = y
-        self.num_features = num_features
-        self.cat_features = cat_features
-        self.reset_features()
-
-    def reset_features(self):
-        self.current_num = self.num_features.copy()
-        self.current_cat = self.cat_features.copy()
-
-    def apply_column_transformer(self):
-        self.current_num = list(range(len(self.current_num)))
-        self.current_cat = list(range(len(self.current_num), 
-                                    len(self.current_num)+len(self.current_cat)))
-
-    def apply_onehot_encoding(self):
-        if len(self.cat_features) > 0:
-            new_cat_dims = sum([len(np.unique(self.X[:,i])) 
-                              for i in self.cat_features])
-            self.current_cat = list(range(len(self.num_features), 
-                                        len(self.num_features)+new_cat_dims))
-
-class PipelineOptimizer:
-    """修正后的Pipeline优化器，遍历所有预处理组合"""
-    
-    def __init__(self, steps, model):
-        """
-        steps: 预处理步骤列表，如 ['impute','encode', 'normalize', 'features']
-        model: 最终的分类器或回归器
-        """
-        self.steps = steps
+class BayesianPipelineOptimizer:
+    def __init__(self, steps_order, model, n_trials=50, cv=3):
+        self.steps_order = steps_order
         self.model = model
-        self.step_options = self._get_step_options()
-        self.all_combinations = self._generate_combinations()
-    
-    def _get_step_options(self):
-        """从PrototypeSingleton.POOL中获取每个步骤的候选处理器"""
-        singleton = PrototypeSingleton.get_instance()
-        return {step: singleton.POOL[step] for step in self.steps}
-    
-    def _generate_combinations(self):
-        """生成所有可能的步骤组合（笛卡尔积）"""
-        options = [self.step_options[step] for step in self.steps]
-        return list(itertools.product(*options))
-    
-    def _build_pipeline(self, combination, num_features, cat_features):
-        """根据组合构建预处理Pipeline"""
-        # 定义步骤到处理流程的映射
-        processing_flows = {
-            'impute': ['num', 'cat'],
-            'encode': ['cat'],
-            'normalize': ['num'],
-            'features': ['global']
+        self.n_trials = n_trials
+        self.cv = cv
+        self.study = None
+        
+        self.step_types = {
+            'impute': 'transformer',
+            'encode': 'transformer',
+            'normalize': 'transformer',
+            'discretize': 'transformer',
+            'rebalance': 'resampler',
+            'features': 'transformer'
         }
-        
-        numerical_steps = []
-        categorical_steps = []
-        global_steps = []
-        
-        # 解析组合中的每个步骤
-        for step_name, processor in zip(self.steps, combination):
+
+    def _build_dynamic_pipeline(self, trial, X):
+        singleton = PrototypeSingleton.get_instance()
+        num_steps = []
+        cat_steps = []
+        main_steps = []
+        param_mapping = {}
+
+        for step_type in self.steps_order:
+            op_pool = singleton.POOL[step_type]
+            op_idx = trial.suggest_categorical(f"{step_type}_op", list(range(len(op_pool))))
+            processor = op_pool[op_idx]
+            
             if processor is None:
                 continue
-            flows = processing_flows.get(step_name, [])
-            for flow in flows:
-                if flow == 'num':
-                    numerical_steps.append((f"{step_name}", processor))
-                elif flow == 'cat':
-                    categorical_steps.append((f"{step_name}", processor))
-                elif flow == 'global':
-                    global_steps.append((f"{step_name}", processor))
-        
-        # 构建数值和类别Pipeline
-        num_pipeline = Pipeline(numerical_steps) if numerical_steps else 'passthrough'
-        cat_pipeline = Pipeline(categorical_steps) if categorical_steps else 'passthrough'
-        
-        # 构建ColumnTransformer
+                
+            op_class = processor.__class__
+            param_grid = singleton.PARAM_GRIDS[step_type].get(op_class, {})
+            params = {}
+            
+            for param, values in param_grid.items():
+                if isinstance(values, list):
+                    params[param] = trial.suggest_categorical(
+                        f"{step_type}_{op_class.__name__}_{param}", 
+                        values
+                    )
+                elif isinstance(values, tuple):
+                    if all(isinstance(v, int) for v in values):
+                        params[param] = trial.suggest_int(
+                            f"{step_type}_{op_class.__name__}_{param}",
+                            min(values),
+                            max(values)
+                        )
+                    else:
+                        params[param] = trial.suggest_float(
+                            f"{step_type}_{op_class.__name__}_{param}",
+                            min(values),
+                            max(values)
+                        )
+            
+            cloned_op = clone(processor)
+            cloned_op.set_params(**params)
+            
+            if self.step_types[step_type] == 'resampler':
+                wrapped_op = ResampleWrapper(cloned_op)
+                main_steps.append((f"{step_type}_{op_class.__name__}", wrapped_op))
+            else:
+                wrapped_op = TransformWrapper(cloned_op)
+                if step_type in ['impute', 'normalize', 'discretize']:
+                    num_steps.append((f"{step_type}_{op_class.__name__}", wrapped_op))
+                elif step_type == 'encode':
+                    cat_steps.append((f"{step_type}_{op_class.__name__}", wrapped_op))
+                else:
+                    main_steps.append((f"{step_type}_{op_class.__name__}", wrapped_op))
+            
+            param_mapping[(step_type, op_class)] = params
+
         transformers = []
-        if len(num_features) > 0:
-            transformers.append(('num', num_pipeline, num_features))
-        if len(cat_features) > 0:
-            transformers.append(('cat', cat_pipeline, cat_features))
+        if num_steps:
+            transformers.append(('num', ImbPipeline(num_steps), list(range(X.shape[1]))))
+        if cat_steps:
+            transformers.append(('cat', ImbPipeline(cat_steps), list(range(X.shape[1]))))
         
         pipeline_steps = []
         if transformers:
-            pipeline_steps.append(('preprocessor', ColumnTransformer(transformers)))
+            pipeline_steps.append(('preprocessing', ColumnTransformer(transformers, remainder='drop')))
         
-        # 添加全局处理步骤
-        for step_name, processor in global_steps:
-            pipeline_steps.append((step_name, processor))
+        resample_steps = [s for s in main_steps if isinstance(s[1], ResampleWrapper)]
+        other_steps = [s for s in main_steps if not isinstance(s[1], ResampleWrapper)]
         
-        # 添加模型
+        pipeline_steps += other_steps
+        pipeline_steps += resample_steps
         pipeline_steps.append(('classifier', self.model))
         
-        return Pipeline(pipeline_steps)
-    
-    def optimize(self, X, y, test_size=0.2, n_iter=None):
-        """执行优化并评估所有组合"""
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=test_size, random_state=42
+        return ImbPipeline(pipeline_steps), param_mapping
+
+    def _objective(self, trial, X, y):
+        try:
+            singleton = PrototypeSingleton.get_instance()
+            singleton.num_features = list(range(X.shape[1]))
+            singleton.cat_features = []
+            
+            pipeline, _ = self._build_dynamic_pipeline(trial, X)
+            
+            scores = cross_val_score(
+                pipeline, X, y, 
+                cv=self.cv, 
+                scoring='accuracy',
+                error_score='raise'
+            )
+            return np.mean(scores)
+        except Exception as e:
+            print(f"\n⚠️ Trial {trial.number} failed: {str(e)}")
+            return float('-inf')
+
+    def optimize(self, X, y):
+        self.study = optuna.create_study(
+            direction='maximize', 
+            sampler=optuna.samplers.TPESampler(
+                n_startup_trials=10,
+                multivariate=True,
+                group=True
+            )
+        )
+        objective_with_data = partial(self._objective, X=X, y=y)
+        
+        with tqdm(total=self.n_trials, desc="Optimizing Pipeline") as pbar:
+            def update_pbar(study, trial):
+                pbar.update(1)
+                current_best = study.best_value if study.best_value != float('-inf') else 0.0
+                pbar.set_postfix({"Best Acc": f"{current_best:.4f}"})
+            
+            self.study.optimize(objective_with_data, n_trials=self.n_trials, callbacks=[update_pbar])
+        
+        return self.study.best_params, self.study.best_value
+
+    def format_final_result(self):
+        if not self.study or self.study.best_value == float('-inf'):
+            return "No valid configuration found"
+            
+        best_params = self.study.best_params
+        config = {}
+        
+        for param in best_params:
+            parts = param.split('_')
+            step_type = parts[0]
+            op_class_name = parts[1]
+            
+            if step_type not in config:
+                config[step_type] = {'operator': None, 'params': {}}
+            
+            param_name = '_'.join(parts[2:])
+            param_value = best_params[param]
+            
+            op_pool = PrototypeSingleton.POOL[step_type]
+            for op in op_pool:
+                if op is not None and op.__class__.__name__ == op_class_name:
+                    config[step_type]['operator'] = op.__class__
+                    break
+                    
+            config[step_type]['params'][param_name] = param_value
+        
+        output = []
+        for step in self.steps_order:
+            if step not in config or config[step]['operator'] is None:
+                output.append(f"{step}: None")
+                continue
+                
+            op_class = config[step]['operator']
+            param_str = ", ".join(
+                f"{k}={v}" for k, v in config[step]['params'].items() 
+                if k in PrototypeSingleton.PARAM_GRIDS[step].get(op_class, {})
+            )
+            output.append(f"{step}: {op_class.__name__}({param_str})")
+        
+        return "\n".join(output)
+
+if __name__ == "__main__":
+    from sklearn.datasets import load_breast_cancer, load_iris, make_classification
+    from sklearn.ensemble import RandomForestClassifier
+
+    # 1. 数据集切换功能
+    DATASET_CHOICE = 1  # 通过修改这个值切换数据集
+
+    datasets = {
+        1: ("Breast Cancer", load_breast_cancer()),
+        2: ("Iris", load_iris()),
+        3: ("Synthetic", make_classification(n_samples=1000, n_features=20, n_informative=15))
+    }
+
+    # 获取选定数据集
+    dataset_name, dataset = datasets[DATASET_CHOICE]
+    if isinstance(dataset, tuple):  # 处理make_classification的特殊情况
+        X, y = dataset[0], dataset[1]
+    else:
+        X, y = dataset.data, dataset.target
+
+    # 2. 多步骤顺序优化
+    steps_order_candidates = [
+        # ['impute', 'encode', 'normalize', 'rebalance', 'features'],
+        ['impute', 'encode', 'normalize', 'features', 'rebalance'],
+        ['impute','encode', 'discretize', 'features', 'rebalance']
+    ]
+
+    best_overall = {
+        'accuracy': -np.inf,
+        'config': None,
+        'steps_order': None
+    }
+
+    for i, steps_order in enumerate(steps_order_candidates, 1):
+        print(f"\n{'='*40}\nOptimizing Pipeline Config {i}: {steps_order}\n{'='*40}")
+        
+        optimizer = BayesianPipelineOptimizer(
+            steps_order=steps_order,
+            model=RandomForestClassifier(n_estimators=50, random_state=42),
+            n_trials=30,
+            cv=3
         )
         
-        singleton = PrototypeSingleton.get_instance()
-        num_features = singleton.num_features
-        cat_features = singleton.cat_features
+        best_params, best_score = optimizer.optimize(X, y)
         
-        best_score = 0
-        best_pipeline = None
-        
-        for i, combination in enumerate(self.all_combinations):
-            if n_iter is not None and i >= n_iter:
-                break
-            print(f"Evaluating combination {i+1}/{len(self.all_combinations)}: {combination}")
-            
-            try:
-                pipeline = self._build_pipeline(combination, num_features, cat_features)
-                pipeline.fit(X_train, y_train)
-                y_pred = pipeline.predict(X_test)
-                score = accuracy_score(y_test, y_pred)
-                print(f"Score: {score:.4f}")
-                
-                if score > best_score:
-                    best_score = score
-                    best_pipeline = pipeline
-                    print(f"New best score: {best_score:.4f}")
-            except Exception as e:
-                print(f"Error with combination {combination}: {str(e)}")
-                continue
-        
-        if best_pipeline is None:
-            raise RuntimeError("No valid pipeline found.")
-        
-        return best_pipeline, best_score
+        if best_score > best_overall['accuracy']:
+            best_overall['accuracy'] = best_score
+            best_overall['config'] = optimizer.format_final_result()
+            best_overall['steps_order'] = steps_order
 
-def main():
-    """测试优化器"""
-    from sklearn.datasets import load_breast_cancer
-    from sklearn.ensemble import RandomForestClassifier
-    
-    # 加载数据
-    data = load_breast_cancer()
-    X, y = data.data, data.target
-    
-    # 配置PrototypeSingleton
-    singleton = PrototypeSingleton.get_instance()
-    num_features = list(range(X.shape[1]))  # 所有特征均为数值型
-    cat_features = []
-    singleton.configure(steps=[], X=X, y=y, num_features=num_features, cat_features=cat_features)
-    
-    # 创建模型
-    model = RandomForestClassifier(n_estimators=50, random_state=42)
-    
-    # 创建优化器
-    optimizer = PipelineOptimizer(
-        steps=['impute','encode', 'normalize', 'features'],
-        model=model
-    )
-    
-    # 执行优化
-    best_pipe, best_score = optimizer.optimize(X, y)
-    
     # 基准测试
     baseline = RandomForestClassifier(n_estimators=50, random_state=42)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     baseline.fit(X_train, y_train)
     baseline_score = accuracy_score(y_test, baseline.predict(X_test))
-    
-    print(f"\n优化结果:")
-    print(f"- 优化后的准确率: {best_score:.4f}")
-    print(f"- 基准准确率: {baseline_score:.4f}")
-    print("最优pipeline步骤:")
-    for name, step in best_pipe.steps:
-        print(f"  {name}: {step.__class__.__name__ if hasattr(step, '__class__') else step}")
 
-if __name__ == "__main__":
-    main()
+    # 最终输出
+    print("\n\n" + "="*60)
+    print(f"Dataset: {dataset_name} (n_samples={X.shape[0]}, n_features={X.shape[1]})")
+    print("="*60)
+    print(f"Baseline Accuracy: {baseline_score:.4f}")
+    
+    if best_overall['accuracy'] != -np.inf:
+        print(f"\n🏆 Best Optimized Accuracy: {best_overall['accuracy']:.4f}")
+        print(f"🔧 From steps_order: {best_overall['steps_order']}")
+        print("\nBest Configuration:")
+        print(best_overall['config'])
+    else:
+        print("\n❌ No valid configuration found in any steps_order")
