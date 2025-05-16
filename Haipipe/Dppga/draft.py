@@ -48,16 +48,16 @@ class TransformWrapper(BaseEstimator):
 class PrototypeSingleton:
     _instance = None
     POOL = {
-        "impute": [None, SimpleImputer(), IterativeImputer()],
-        "encode": [None, OneHotEncoder(sparse_output=False, handle_unknown='ignore')],
-        "rebalance": [None, NearMiss(version=1), SMOTE()],
+        "impute": [SimpleImputer(), IterativeImputer()],
+        "encode": [OneHotEncoder(sparse_output=False, handle_unknown='ignore')],
+        "rebalance": [NearMiss(version=1), SMOTE()],
         "normalize": [
-            None, StandardScaler(),
+            StandardScaler(),
             PowerTransformer(), MinMaxScaler(), RobustScaler()
         ],
-        "discretize": [None, KBinsDiscretizer(), Binarizer()],
+        "discretize": [KBinsDiscretizer(), Binarizer()],
         "features": [
-            None, PCA(), SelectKBest(),
+            PCA(), SelectKBest(),
             FeatureUnion([("pca", PCA()), ("selectkbest", SelectKBest())])
         ],
     }
@@ -270,30 +270,42 @@ class BayesianPipelineOptimizer:
         return "\n".join(output)
 
 if __name__ == "__main__":
-    from sklearn.datasets import load_breast_cancer, load_iris, make_classification
+    from sklearn.datasets import make_classification
+    from sklearn.datasets import (
+        load_breast_cancer, load_iris, load_wine, 
+        load_digits, make_moons, make_circles
+    )
     from sklearn.ensemble import RandomForestClassifier
 
-    # 1. 数据集切换功能
-    DATASET_CHOICE = 1  # 通过修改这个值切换数据集
+    # 数据集选择配置
+    DATASET_CHOICE = 1  # 通过修改这个值切换数据集 (1-7)
 
     datasets = {
         1: ("Breast Cancer", load_breast_cancer()),
         2: ("Iris", load_iris()),
-        3: ("Synthetic", make_classification(n_samples=1000, n_features=20, n_informative=15))
+        3: ("Wine", load_wine()),
+        4: ("Digits", load_digits()),
+        5: ("Moons", make_moons(n_samples=200, noise=0.2)),
+        6: ("Circles", make_circles(n_samples=200, noise=0.1, factor=0.7)),
+        7: ("Synthetic", make_classification(
+            n_samples=200, n_features=10, 
+            n_informative=5, n_classes=3))
     }
 
     # 获取选定数据集
     dataset_name, dataset = datasets[DATASET_CHOICE]
-    if isinstance(dataset, tuple):  # 处理make_classification的特殊情况
+    if isinstance(dataset, tuple):  # 处理合成数据
         X, y = dataset[0], dataset[1]
     else:
         X, y = dataset.data, dataset.target
 
-    # 2. 多步骤顺序优化
+    # 有效管道原型
     steps_order_candidates = [
-        # ['impute', 'encode', 'normalize', 'rebalance', 'features'],
-        ['impute', 'encode', 'normalize', 'features', 'rebalance'],
-        ['impute','encode', 'discretize', 'features', 'rebalance']
+        ['impute', 'encode', 'normalize', 'rebalance', 'features'],
+        # ['impute', 'encode', 'normalize', 'features', 'rebalance'],
+        ['impute', 'encode', 'rebalance', 'discretize', 'features'],
+        # ['impute','encode', 'discretize', 'features', 'rebalance'],
+        # ['impute','encode', 'discretize', 'rebalance', 'features']
     ]
 
     best_overall = {
@@ -326,15 +338,17 @@ if __name__ == "__main__":
     baseline_score = accuracy_score(y_test, baseline.predict(X_test))
 
     # 最终输出
-    print("\n\n" + "="*60)
-    print(f"Dataset: {dataset_name} (n_samples={X.shape[0]}, n_features={X.shape[1]})")
-    print("="*60)
+    print(f"\n{'='*40}")
+    print(f"Dataset: {dataset_name}")
+    print(f"Samples: {X.shape[0]}, Features: {X.shape[1]}")
+    print(f"Classes: {len(np.unique(y))}")
+    print("="*40)
     print(f"Baseline Accuracy: {baseline_score:.4f}")
     
     if best_overall['accuracy'] != -np.inf:
-        print(f"\n🏆 Best Optimized Accuracy: {best_overall['accuracy']:.4f}")
-        print(f"🔧 From steps_order: {best_overall['steps_order']}")
-        print("\nBest Configuration:")
+        print(f"\n Best Optimized Accuracy: {best_overall['accuracy']:.4f}")
+        print(f" From steps_order: {best_overall['steps_order']}")
+        print("\n Best Configuration:")
         print(best_overall['config'])
     else:
-        print("\n❌ No valid configuration found in any steps_order")
+        print("\n No valid configuration found in any steps_order")

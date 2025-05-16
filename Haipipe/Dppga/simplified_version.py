@@ -270,40 +270,50 @@ class BayesianPipelineOptimizer:
         return "\n".join(output)
 
 if __name__ == "__main__":
-    from sklearn.datasets import make_classification
+    from sklearn.datasets import make_classification, load_breast_cancer, fetch_openml
     from sklearn.datasets import (
-        load_breast_cancer, load_iris, load_wine, 
-        load_digits, make_moons, make_circles
+        load_breast_cancer, make_moons, make_circles
     )
     from sklearn.ensemble import RandomForestClassifier
+    import numpy as np
 
-    # 数据集选择配置
-    DATASET_CHOICE = 6  # 通过修改这个值切换数据集 (1-7)
+    # 泰坦尼克数据集加载
+    def load_titanic():
+        raw = fetch_openml('titanic', version=1)
+        X = raw.data[['pclass', 'age', 'sibsp', 'fare']].fillna(0).values.astype(float)
+        y = (raw.target == '1').astype(int).values
+        return X, y
+
+    # 数据集配置
+    DATASET_CHOICE = 7  # 修改这个值切换数据集 (1-7)
 
     datasets = {
         1: ("Breast Cancer", load_breast_cancer()),
-        2: ("Iris", load_iris()),
-        3: ("Wine", load_wine()),
-        4: ("Digits", load_digits()),
-        5: ("Moons", make_moons(n_samples=200, noise=0.2)),
-        6: ("Circles", make_circles(n_samples=200, noise=0.1, factor=0.7)),
-        7: ("Synthetic", make_classification(
-            n_samples=200, n_features=10, 
-            n_informative=5, n_classes=3))
+        2: ("Titanic", load_titanic()),
+        3: ("Synthetic", make_classification(
+            n_samples=1000, n_features=10, 
+            n_informative=5, n_classes=3)),
+        4: ("Moons", make_moons(n_samples=1000, noise=0.3)),
+        5: ("Circles", make_circles(n_samples=1000, noise=0.2, factor=0.5)),
+        6: ("Complex1", make_classification(
+            n_samples=1000, n_features=20, 
+            n_informative=8, n_redundant=5,
+            n_clusters_per_class=2, n_classes=5)),
+        7: ("Complex2", make_classification(
+            n_samples=1000, n_features=25,
+            n_informative=10, n_repeated=2,
+            n_classes=3, flip_y=0.3))
     }
 
-    # 获取选定数据集
+    # 完全保持原有数据获取逻辑
     dataset_name, dataset = datasets[DATASET_CHOICE]
-    if isinstance(dataset, tuple):  # 处理合成数据
-        X, y = dataset[0], dataset[1]
-    else:
-        X, y = dataset.data, dataset.target
+    X, y = (dataset.data, dataset.target) if hasattr(dataset, 'data') else dataset
 
     # 有效管道原型
     steps_order_candidates = [
         ['impute', 'encode', 'normalize', 'rebalance', 'features'],
         ['impute', 'encode', 'normalize', 'features', 'rebalance'],
-        ['impute', 'encode', 'rebalance', 'discretize', 'features'],
+        ['impute','encode', 'rebalance', 'discretize', 'features'],
         ['impute','encode', 'discretize', 'features', 'rebalance'],
         ['impute','encode', 'discretize', 'rebalance', 'features']
     ]
@@ -347,7 +357,7 @@ if __name__ == "__main__":
     
     if best_overall['accuracy'] != -np.inf:
         print(f"\n Best Optimized Accuracy: {best_overall['accuracy']:.4f}")
-        print(f" From steps_order: {best_overall['steps_order']}")
+        print(f" From Effective pipeline prototype: {best_overall['steps_order']}")
         print("\n Best Configuration:")
         print(best_overall['config'])
     else:
