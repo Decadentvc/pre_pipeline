@@ -271,24 +271,51 @@ class BayesianPipelineOptimizer:
 
 if __name__ == "__main__":
     from sklearn.datasets import make_classification, load_breast_cancer, fetch_openml
-    from sklearn.datasets import (
-        load_breast_cancer, make_moons, make_circles
-    )
+    from sklearn.datasets import make_moons, make_circles
     from sklearn.ensemble import RandomForestClassifier
     import numpy as np
+    import pandas as pd
 
-    # 泰坦尼克数据集加载
+    # 新增本地数据集加载函数
+    def load_local_data(file_path='./local_data.csv', 
+                       target_column='target',
+                       feature_columns=None):
+        """
+        从本地CSV文件加载数据集
+        参数：
+            file_path: 数据文件路径（默认当前目录的local_data.csv）
+            target_column: 目标变量列名（默认'target'）
+            feature_columns: 特征列列表（None表示自动选择除目标列外的所有列）
+        返回：
+            X, y 格式与sklearn数据集一致
+        """
+        try:
+            df = pd.read_csv(file_path)
+            
+            # 自动检测特征列（如果未指定）
+            if feature_columns is None:
+                feature_columns = [col for col in df.columns if col != target_column]
+                
+            # 处理可能的缺失值（简单用中位数填充）
+            df[feature_columns] = df[feature_columns].fillna(df[feature_columns].median())
+            
+            return df[feature_columns].values, df[target_column].values
+        except Exception as e:
+            print(f"加载本地数据失败: {str(e)}")
+            return None, None
+
+    # 泰坦尼克数据集加载（原有功能保留）
     def load_titanic():
         raw = fetch_openml('titanic', version=1)
         X = raw.data[['pclass', 'age', 'sibsp', 'fare']].fillna(0).values.astype(float)
         y = (raw.target == '1').astype(int).values
         return X, y
 
-    # 数据集配置
-    DATASET_CHOICE = 2
-      # 修改这个值切换数据集 (1-7)
+    # 数据集配置（新增本地数据集选项）
+    DATASET_CHOICE = 8  # 修改这个值切换数据集
 
     datasets = {
+        # 内置数据集
         1: ("Breast Cancer", load_breast_cancer()),
         2: ("Titanic", load_titanic()),
         3: ("Synthetic", make_classification(
@@ -303,12 +330,23 @@ if __name__ == "__main__":
         7: ("Complex2", make_classification(
             n_samples=1000, n_features=25,
             n_informative=10, n_repeated=2,
-            n_classes=3, flip_y=0.3))
+            n_classes=3, flip_y=0.3)),
+        # 新增本地数据集选项
+        8: ("Local Dataset", load_local_data(
+            file_path='Haipipe/data/dataset/primaryobjects_voicegender/voice.csv',  # 实际路径
+            target_column='label'))
     }
 
-    # 完全保持原有数据获取逻辑
+    # 数据加载逻辑（兼容本地和内置数据集）
     dataset_name, dataset = datasets[DATASET_CHOICE]
-    X, y = (dataset.data, dataset.target) if hasattr(dataset, 'data') else dataset
+    
+    # 处理不同数据源类型
+    if isinstance(dataset, tuple):  # 处理函数返回的元组
+        X, y = dataset
+    elif hasattr(dataset, 'data'):  # 处理sklearn数据集对象
+        X, y = dataset.data, dataset.target
+    else:  # 处理其他可能的数据格式
+        raise ValueError("不支持的数据集格式")
 
     # 有效管道原型
     steps_order_candidates = [
