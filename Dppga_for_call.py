@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import SimpleImputer, IterativeImputer
 from sklearn.preprocessing import (
@@ -20,9 +21,112 @@ from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.under_sampling import NearMiss
 from imblearn.over_sampling import SMOTE
 from functools import partial
+import pandas as pd
 import warnings
 
 warnings.filterwarnings('ignore', category=UserWarning)
+
+class PipelineOptimizer:
+    def __init__(self, file_path, target_column='target', feature_columns=None,
+                 steps_order_candidates=None, n_trials=30, cv=3,show_progress=True):
+        """
+        初始化管道优化器
+        参数：
+            file_path: 数据文件路径
+            target_column: 目标变量列名
+            feature_columns: 特征列列表（None表示自动选择）
+            steps_order_candidates: 候选步骤顺序列表
+            n_trials: 优化试验次数
+            cv: 交叉验证折数
+        """
+        self.file_path = file_path
+        self.target_column = target_column
+        self.feature_columns = feature_columns
+        self.steps_order_candidates = steps_order_candidates or [
+            ['impute', 'encode', 'normalize', 'rebalance', 'features'],
+            ['impute', 'encode', 'normalize', 'features', 'rebalance'],
+            ['impute','encode', 'rebalance', 'discretize', 'features'],
+            ['impute','encode', 'discretize', 'features', 'rebalance']
+        ]
+        self.n_trials = n_trials
+        self.cv = cv
+        self.show_progress = show_progress
+        self.X, self.y = self._load_data()
+        self.best_result = None
+
+    def _load_data(self):
+        """加载并预处理数据"""
+        try:
+            df = pd.read_csv(self.file_path)
+            
+            if self.feature_columns is None:
+                self.feature_columns = [col for col in df.columns if col != self.target_column]
+                
+            # 处理缺失值
+            df[self.feature_columns] = df[self.feature_columns].apply(
+                lambda x: x.fillna(x.median()) if np.issubdtype(x.dtype, np.number) else x.fillna(x.mode()[0])
+            )
+            
+            return df[self.feature_columns].values, df[self.target_column].values
+        except Exception as e:
+            raise ValueError(f"数据加载失败: {str(e)}")
+
+    def _calculate_baseline(self):
+        """计算基准模型准确率"""
+        X_train, X_test, y_train, y_test = train_test_split(
+            self.X, self.y, test_size=0.2, random_state=42
+        )
+        model = RandomForestClassifier(n_estimators=50, random_state=42)
+        model.fit(X_train, y_train)
+        return accuracy_score(y_test, model.predict(X_test))
+
+    def optimize(self):
+        """执行优化流程"""
+        best_overall = {
+            'accuracy': -np.inf,
+            'config': None,
+            'steps_order': None
+        }
+
+        baseline_score = self._calculate_baseline()
+        
+        for steps_order in self.steps_order_candidates:
+            optimizer = BayesianPipelineOptimizer(
+                steps_order=steps_order,
+                model=RandomForestClassifier(n_estimators=50, random_state=42),
+                n_trials=self.n_trials,
+                cv=self.cv
+            )
+            
+            try:
+                _, best_score = optimizer.optimize(self.X, self.y)
+                if best_score > best_overall['accuracy']:
+                    best_overall.update({
+                        'accuracy': best_score,
+                        'config': optimizer.format_final_result(),
+                        'steps_order': steps_order
+                    })
+            except Exception as e:
+                print(f"优化过程中出现异常: {str(e)}")
+                continue
+
+        self.best_result = {
+            'baseline_accuracy': baseline_score,
+            'best_accuracy': best_overall['accuracy'],
+            'best_pipeline_steps': best_overall['steps_order']
+        }
+        return self.best_result
+
+    def get_results(self):
+        """获取优化结果"""
+        if not self.best_result:
+            raise RuntimeError("请先执行optimize()方法")
+            
+        return {
+            "Baseline Accuracy": f"{self.best_result['baseline_accuracy']:.4f}",
+            "Best Optimized Accuracy": f"{self.best_result['best_accuracy']:.4f}",
+            "Effective Pipeline Prototype": self.best_result['best_pipeline_steps']
+        }
 
 class ResampleWrapper(BaseEstimator):
     def __init__(self, resampler):
@@ -97,11 +201,12 @@ class PrototypeSingleton:
         return cls._instance
 
 class BayesianPipelineOptimizer:
-    def __init__(self, steps_order, model, n_trials=50, cv=3):
+    def __init__(self, steps_order, model, n_trials=50, cv=3, show_progress=True):
         self.steps_order = steps_order
         self.model = model
         self.n_trials = n_trials
         self.cv = cv
+        self.show_progress = show_progress
         self.study = None
         
         self.step_types = {
@@ -218,13 +323,16 @@ class BayesianPipelineOptimizer:
         )
         objective_with_data = partial(self._objective, X=X, y=y)
         
-        with tqdm(total=self.n_trials, desc="Optimizing Pipeline") as pbar:
-            def update_pbar(study, trial):
-                pbar.update(1)
-                current_best = study.best_value if study.best_value != float('-inf') else 0.0
-                pbar.set_postfix({"Best Acc": f"{current_best:.4f}"})
-            
-            self.study.optimize(objective_with_data, n_trials=self.n_trials, callbacks=[update_pbar])
+        if self.show_progress:
+            with tqdm(total=self.n_trials, desc="Optimizing Pipeline") as pbar:
+                def update_pbar(study, trial):
+                    pbar.update(1)
+                    current_best = study.best_value if study.best_value != float('-inf') else 0.0
+                    pbar.set_postfix({"Best Acc": f"{current_best:.4f}"})
+                
+                self.study.optimize(objective_with_data, n_trials=self.n_trials, callbacks=[update_pbar])
+        else:
+            self.study.optimize(objective_with_data, n_trials=self.n_trials)
         
         return self.study.best_params, self.study.best_value
 
