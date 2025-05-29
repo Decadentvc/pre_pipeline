@@ -297,7 +297,7 @@ if __name__ == "__main__":
                 feature_columns = [col for col in df.columns if col != target_column]
                 
             # 处理可能的缺失值（简单用中位数填充）
-            df[feature_columns] = df[feature_columns].fillna(df[feature_columns].median())
+            # df[feature_columns] = df[feature_columns].fillna(df[feature_columns].median())
             
             return df[feature_columns].values, df[target_column].values
         except Exception as e:
@@ -312,7 +312,7 @@ if __name__ == "__main__":
         return X, y
 
     # 数据集配置（新增本地数据集选项）
-    DATASET_CHOICE = 1  # 修改这个值切换数据集
+    DATASET_CHOICE = 8  # 修改这个值切换数据集
 
     datasets = {
         # 内置数据集
@@ -333,7 +333,7 @@ if __name__ == "__main__":
             n_classes=3, flip_y=0.3)),
         # 新增本地数据集选项
         8: ("Local Dataset", load_local_data(
-            file_path='Haipipe/data/dataset/primaryobjects_voicegender/voice.csv',  # 实际路径
+            file_path='dataset_temp/abcsds_pokemon_Pokemon.csv',  # 实际路径
             target_column='label'))
     }
 
@@ -351,10 +351,10 @@ if __name__ == "__main__":
     # 有效管道原型
     steps_order_candidates = [
         ['impute', 'encode', 'normalize', 'rebalance', 'features'],
-        ['impute', 'encode', 'normalize', 'features', 'rebalance'],
-        ['impute','encode', 'rebalance', 'discretize', 'features'],
-        ['impute','encode', 'discretize', 'features', 'rebalance'],
-        ['impute','encode', 'discretize', 'rebalance', 'features']
+        # ['impute', 'encode', 'normalize', 'features', 'rebalance'],
+        # ['impute','encode', 'rebalance', 'discretize', 'features'],
+        # ['impute','encode', 'discretize', 'features', 'rebalance'],
+        # ['impute','encode', 'discretize', 'rebalance', 'features']
     ]
 
     best_overall = {
