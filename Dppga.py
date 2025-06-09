@@ -333,7 +333,7 @@ if __name__ == "__main__":
             n_classes=3, flip_y=0.3)),
         # 新增本地数据集选项
         8: ("Local Dataset", load_local_data(
-            file_path='dataset_temp/abcsds_pokemon_Pokemon.csv',  # 实际路径
+            file_path='dataset_temp/pre_pipeline/dataset_temp/abhinavralhan_titanic__train.csv',  # 实际路径
             target_column='label'))
     }
 
