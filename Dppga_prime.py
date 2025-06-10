@@ -273,35 +273,81 @@ if __name__ == "__main__":
     from sklearn.datasets import make_classification, load_breast_cancer, fetch_openml
     from sklearn.datasets import make_moons, make_circles
     from sklearn.ensemble import RandomForestClassifier
+    from sklearn.preprocessing import LabelEncoder
     import numpy as np
     import pandas as pd
 
     # 新增本地数据集加载函数
     def load_local_data(file_path='./local_data.csv', 
-                       target_column='target',
-                       feature_columns=None):
+                    target_column='label',
+                    feature_columns=None):
         """
-        从本地CSV文件加载数据集
+        从本地CSV文件加载数据集并自动处理字符串特征
+        
         参数：
-            file_path: 数据文件路径（默认当前目录的local_data.csv）
-            target_column: 目标变量列名（默认'target'）
+            file_path: 数据文件路径
+            target_column: 目标变量列名
             feature_columns: 特征列列表（None表示自动选择除目标列外的所有列）
+            
         返回：
             X, y 格式与sklearn数据集一致
         """
         try:
+            # 加载数据
             df = pd.read_csv(file_path)
             
-            # 自动检测特征列（如果未指定）
+            # 检查目标列是否存在
+            if target_column not in df.columns:
+                raise ValueError(f"目标列 '{target_column}' 不存在于数据集中")
+            
+            # 自动检测特征列
             if feature_columns is None:
                 feature_columns = [col for col in df.columns if col != target_column]
-                
-            # 处理可能的缺失值（简单用中位数填充）
-            # df[feature_columns] = df[feature_columns].fillna(df[feature_columns].median())
+            elif target_column in feature_columns:
+                feature_columns.remove(target_column)
             
-            return df[feature_columns].values, df[target_column].values
+            # 复制原始数据以避免修改原始DataFrame
+            df_processed = df.copy()
+            
+            # 处理字符串特征：将非数值特征转换为数值
+            label_encoders = {}
+            for col in feature_columns:
+                if df[col].dtype == 'object' or isinstance(df[col].dtype, pd.CategoricalDtype):
+                    # 使用LabelEncoder转换字符串特征
+                    le = LabelEncoder()
+                    df_processed[col] = le.fit_transform(df[col].astype(str))
+                    label_encoders[col] = le
+            
+            # 处理目标变量中的字符串
+            if df[target_column].dtype == 'object' or isinstance(df[target_column].dtype, pd.CategoricalDtype):
+                le_target = LabelEncoder()
+                df_processed[target_column] = le_target.fit_transform(df[target_column].astype(str))
+                print(f"目标列已编码为: {le_target.classes_}")
+            
+            # 填充缺失值（只处理特征列）
+            for col in feature_columns:
+                # 数值列用中位数填充
+                if np.issubdtype(df_processed[col].dtype, np.number):
+                    df_processed[col].fillna(df_processed[col].median(), inplace=True)
+                # 分类列用众数填充
+                else:
+                    df_processed[col].fillna(df_processed[col].mode()[0], inplace=True)
+            
+            # 转换为numpy数组
+            X = df_processed[feature_columns].values.astype(np.float32)
+            y = df_processed[target_column].values
+            
+            # 验证数据维度
+            print(f"加载数据集成功: {file_path}")
+            print(f"特征形状: {X.shape}, 目标形状: {y.shape}")
+            print(f"特征类型: {type(X[0,0])}, 目标类型: {type(y[0])}")
+            print(f"缺失值统计 - 特征: {np.isnan(X).sum()}, 目标: {np.isnan(y).sum()}")
+            
+            return X, y
         except Exception as e:
             print(f"加载本地数据失败: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return None, None
 
     # 泰坦尼克数据集加载（原有功能保留）
@@ -331,22 +377,46 @@ if __name__ == "__main__":
             n_samples=1000, n_features=25,
             n_informative=10, n_repeated=2,
             n_classes=3, flip_y=0.3)),
-        # 新增本地数据集选项
-        8: ("Local Dataset", load_local_data(
-            file_path='dataset_temp/pre_pipeline/dataset_temp/abhinavralhan_titanic__train.csv',  # 实际路径
-            target_column='label'))
+        # 本地数据集选项
+        8: ("Local Dataset", None)
     }
 
     # 数据加载逻辑（兼容本地和内置数据集）
-    dataset_name, dataset = datasets[DATASET_CHOICE]
-    
-    # 处理不同数据源类型
-    if isinstance(dataset, tuple):  # 处理函数返回的元组
-        X, y = dataset
-    elif hasattr(dataset, 'data'):  # 处理sklearn数据集对象
-        X, y = dataset.data, dataset.target
-    else:  # 处理其他可能的数据格式
-        raise ValueError("不支持的数据集格式")
+    if DATASET_CHOICE == 8:  # 本地数据集
+        print("\n正在加载本地数据集...")
+        X, y = load_local_data(
+            file_path='dataset_temp/adammaus_predicting-churn-for-bank-customers__Churn_Modelling.csv',
+            target_column='label'
+        )
+        
+        # 检查数据有效性
+        if X is None or y is None:
+            print("加载本地数据集失败，请检查路径和格式")
+            exit()
+        
+        # 强制转换为float类型
+        try:
+            X = X.astype(np.float32)
+            y = y.astype(np.float32).astype(int)  # 目标需要是整数
+        except Exception as e:
+            print(f"转换数据类型失败: {str(e)}")
+            exit()
+            
+        dataset_name = "Local Dataset"
+        # 添加额外的调试信息
+        print("数据格式检查:")
+        print(f"X类型: {type(X)}, y类型: {type(y)}")
+        print(f"X形状: {X.shape}, y形状: {y.shape}")
+        print(f"X示例: {X[:3]}, y示例: {y[:3]}")
+        print(f"NaN值统计 - X: {np.isnan(X).sum()}, y: {np.isnan(y).sum()}")
+        print(f"唯一值计数 (y): {np.unique(y, return_counts=True)}")
+    else:
+        # 原有内置数据集的加载逻辑保持不变
+        dataset_name, dataset = datasets[DATASET_CHOICE]
+        if isinstance(dataset, tuple):
+            X, y = dataset
+        elif hasattr(dataset, 'data'):
+            X, y = dataset.data, dataset.target
 
     # 有效管道原型
     steps_order_candidates = [

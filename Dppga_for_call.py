@@ -6,7 +6,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import SimpleImputer, IterativeImputer
 from sklearn.preprocessing import (
@@ -21,112 +20,12 @@ from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.under_sampling import NearMiss
 from imblearn.over_sampling import SMOTE
 from functools import partial
-import pandas as pd
 import warnings
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
 
 warnings.filterwarnings('ignore', category=UserWarning)
-
-class PipelineOptimizer:
-    def __init__(self, file_path, target_column='target', feature_columns=None,
-                 steps_order_candidates=None, n_trials=30, cv=3,show_progress=True):
-        """
-        初始化管道优化器
-        参数：
-            file_path: 数据文件路径
-            target_column: 目标变量列名
-            feature_columns: 特征列列表（None表示自动选择）
-            steps_order_candidates: 候选步骤顺序列表
-            n_trials: 优化试验次数
-            cv: 交叉验证折数
-        """
-        self.file_path = file_path
-        self.target_column = target_column
-        self.feature_columns = feature_columns
-        self.steps_order_candidates = steps_order_candidates or [
-            ['impute', 'encode', 'normalize', 'rebalance', 'features'],
-            ['impute', 'encode', 'normalize', 'features', 'rebalance'],
-            ['impute','encode', 'rebalance', 'discretize', 'features'],
-            ['impute','encode', 'discretize', 'features', 'rebalance']
-        ]
-        self.n_trials = n_trials
-        self.cv = cv
-        self.show_progress = show_progress
-        self.X, self.y = self._load_data()
-        self.best_result = None
-
-    def _load_data(self):
-        """加载并预处理数据"""
-        try:
-            df = pd.read_csv(self.file_path)
-            
-            if self.feature_columns is None:
-                self.feature_columns = [col for col in df.columns if col != self.target_column]
-                
-            # 处理缺失值
-            df[self.feature_columns] = df[self.feature_columns].apply(
-                lambda x: x.fillna(x.median()) if np.issubdtype(x.dtype, np.number) else x.fillna(x.mode()[0])
-            )
-            
-            return df[self.feature_columns].values, df[self.target_column].values
-        except Exception as e:
-            raise ValueError(f"数据加载失败: {str(e)}")
-
-    def _calculate_baseline(self):
-        """计算基准模型准确率"""
-        X_train, X_test, y_train, y_test = train_test_split(
-            self.X, self.y, test_size=0.2, random_state=42
-        )
-        model = RandomForestClassifier(n_estimators=50, random_state=42)
-        model.fit(X_train, y_train)
-        return accuracy_score(y_test, model.predict(X_test))
-
-    def optimize(self):
-        """执行优化流程"""
-        best_overall = {
-            'accuracy': -np.inf,
-            'config': None,
-            'steps_order': None
-        }
-
-        baseline_score = self._calculate_baseline()
-        
-        for steps_order in self.steps_order_candidates:
-            optimizer = BayesianPipelineOptimizer(
-                steps_order=steps_order,
-                model=RandomForestClassifier(n_estimators=50, random_state=42),
-                n_trials=self.n_trials,
-                cv=self.cv
-            )
-            
-            try:
-                _, best_score = optimizer.optimize(self.X, self.y)
-                if best_score > best_overall['accuracy']:
-                    best_overall.update({
-                        'accuracy': best_score,
-                        'config': optimizer.format_final_result(),
-                        'steps_order': steps_order
-                    })
-            except Exception as e:
-                print(f"优化过程中出现异常: {str(e)}")
-                continue
-
-        self.best_result = {
-            'baseline_accuracy': baseline_score,
-            'best_accuracy': best_overall['accuracy'],
-            'best_pipeline_steps': best_overall['steps_order']
-        }
-        return self.best_result
-
-    def get_results(self):
-        """获取优化结果"""
-        if not self.best_result:
-            raise RuntimeError("请先执行optimize()方法")
-            
-        return {
-            "Baseline Accuracy": f"{self.best_result['baseline_accuracy']:.4f}",
-            "Best Optimized Accuracy": f"{self.best_result['best_accuracy']:.4f}",
-            "Effective Pipeline Prototype": self.best_result['best_pipeline_steps']
-        }
 
 class ResampleWrapper(BaseEstimator):
     def __init__(self, resampler):
@@ -201,12 +100,11 @@ class PrototypeSingleton:
         return cls._instance
 
 class BayesianPipelineOptimizer:
-    def __init__(self, steps_order, model, n_trials=50, cv=3, show_progress=True):
+    def __init__(self, steps_order, model, n_trials=50, cv=3):
         self.steps_order = steps_order
         self.model = model
         self.n_trials = n_trials
         self.cv = cv
-        self.show_progress = show_progress
         self.study = None
         
         self.step_types = {
@@ -323,16 +221,13 @@ class BayesianPipelineOptimizer:
         )
         objective_with_data = partial(self._objective, X=X, y=y)
         
-        if self.show_progress:
-            with tqdm(total=self.n_trials, desc="Optimizing Pipeline") as pbar:
-                def update_pbar(study, trial):
-                    pbar.update(1)
-                    current_best = study.best_value if study.best_value != float('-inf') else 0.0
-                    pbar.set_postfix({"Best Acc": f"{current_best:.4f}"})
-                
-                self.study.optimize(objective_with_data, n_trials=self.n_trials, callbacks=[update_pbar])
-        else:
-            self.study.optimize(objective_with_data, n_trials=self.n_trials)
+        with tqdm(total=self.n_trials, desc="Optimizing Pipeline") as pbar:
+            def update_pbar(study, trial):
+                pbar.update(1)
+                current_best = study.best_value if study.best_value != float('-inf') else 0.0
+                pbar.set_postfix({"Best Acc": f"{current_best:.4f}"})
+            
+            self.study.optimize(objective_with_data, n_trials=self.n_trials, callbacks=[update_pbar])
         
         return self.study.best_params, self.study.best_value
 
@@ -377,135 +272,115 @@ class BayesianPipelineOptimizer:
         
         return "\n".join(output)
 
-if __name__ == "__main__":
-    from sklearn.datasets import make_classification, load_breast_cancer, fetch_openml
-    from sklearn.datasets import make_moons, make_circles
-    from sklearn.ensemble import RandomForestClassifier
-    import numpy as np
-    import pandas as pd
-
-    # 新增本地数据集加载函数
-    def load_local_data(file_path='./local_data.csv', 
-                       target_column='target',
-                       feature_columns=None):
+class PipelineOptimizer:
+    def __init__(self, file_path, target_column, steps_order_candidates, 
+                 n_trials=50, cv=3, model=None):
         """
-        从本地CSV文件加载数据集
-        参数：
-            file_path: 数据文件路径（默认当前目录的local_data.csv）
-            target_column: 目标变量列名（默认'target'）
-            feature_columns: 特征列列表（None表示自动选择除目标列外的所有列）
-        返回：
-            X, y 格式与sklearn数据集一致
+        初始化管道优化器
+        
+        参数:
+            file_path: 数据文件路径
+            target_column: 目标变量列名
+            steps_order_candidates: 管道步骤顺序候选列表
+            n_trials: Optuna试验次数(默认50)
+            cv: 交叉验证折数(默认3)
+            model: 使用的分类模型(默认RandomForestClassifier)
         """
+        self.file_path = file_path
+        self.target_column = target_column
+        self.steps_order_candidates = steps_order_candidates
+        self.n_trials = n_trials
+        self.cv = cv
+        self.model = model if model else RandomForestClassifier(n_estimators=50, random_state=42)
+        
+        self.X, self.y = self._load_data()
+        self.baseline_score = None
+        self.best_overall = None
+        
+    def _load_data(self):
+        """加载并预处理数据"""
         try:
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(self.file_path)
             
-            # 自动检测特征列（如果未指定）
-            if feature_columns is None:
-                feature_columns = [col for col in df.columns if col != target_column]
-                
-            # 处理可能的缺失值（简单用中位数填充）
-            df[feature_columns] = df[feature_columns].fillna(df[feature_columns].median())
+            if self.target_column not in df.columns:
+                raise ValueError(f"目标列 '{self.target_column}' 不存在于数据集中")
             
-            return df[feature_columns].values, df[target_column].values
+            feature_columns = [col for col in df.columns if col != self.target_column]
+            
+            df_processed = df.copy()
+            label_encoders = {}
+            
+            for col in feature_columns:
+                if df_processed[col].dtype == 'object' or isinstance(df_processed[col].dtype, pd.CategoricalDtype):
+                    le = LabelEncoder()
+                    df_processed[col] = le.fit_transform(df_processed[col].astype(str))
+                    label_encoders[col] = le
+            
+            if df_processed[self.target_column].dtype == 'object' or isinstance(df_processed[self.target_column].dtype, pd.CategoricalDtype):
+                le_target = LabelEncoder()
+                df_processed[self.target_column] = le_target.fit_transform(df_processed[self.target_column].astype(str))
+            
+            # 填充缺失值
+            for col in feature_columns:
+                if np.issubdtype(df_processed[col].dtype, np.number):
+                    df_processed[col].fillna(df_processed[col].median(), inplace=True)
+                else:
+                    df_processed[col].fillna(df_processed[col].mode()[0], inplace=True)
+            
+            X = df_processed[feature_columns].values.astype(np.float32)
+            y = df_processed[self.target_column].values.astype(int)
+            
+            return X, y
+            
         except Exception as e:
-            print(f"加载本地数据失败: {str(e)}")
-            return None, None
-
-    # 泰坦尼克数据集加载（原有功能保留）
-    def load_titanic():
-        raw = fetch_openml('titanic', version=1)
-        X = raw.data[['pclass', 'age', 'sibsp', 'fare']].fillna(0).values.astype(float)
-        y = (raw.target == '1').astype(int).values
-        return X, y
-
-    # 数据集配置（新增本地数据集选项）
-    DATASET_CHOICE = 1  # 修改这个值切换数据集
-
-    datasets = {
-        # 内置数据集
-        1: ("Breast Cancer", load_breast_cancer()),
-        2: ("Titanic", load_titanic()),
-        3: ("Synthetic", make_classification(
-            n_samples=1000, n_features=10, 
-            n_informative=5, n_classes=3)),
-        4: ("Moons", make_moons(n_samples=1000, noise=0.3)),
-        5: ("Circles", make_circles(n_samples=1000, noise=0.2, factor=0.5)),
-        6: ("Complex1", make_classification(
-            n_samples=1000, n_features=20, 
-            n_informative=8, n_redundant=5,
-            n_clusters_per_class=2, n_classes=5)),
-        7: ("Complex2", make_classification(
-            n_samples=1000, n_features=25,
-            n_informative=10, n_repeated=2,
-            n_classes=3, flip_y=0.3)),
-        # 新增本地数据集选项
-        8: ("Local Dataset", load_local_data(
-            file_path='Haipipe/data/dataset/primaryobjects_voicegender/voice.csv',  # 实际路径
-            target_column='label'))
-    }
-
-    # 数据加载逻辑（兼容本地和内置数据集）
-    dataset_name, dataset = datasets[DATASET_CHOICE]
+            print(f"加载数据失败: {str(e)}")
+            raise e
     
-    # 处理不同数据源类型
-    if isinstance(dataset, tuple):  # 处理函数返回的元组
-        X, y = dataset
-    elif hasattr(dataset, 'data'):  # 处理sklearn数据集对象
-        X, y = dataset.data, dataset.target
-    else:  # 处理其他可能的数据格式
-        raise ValueError("不支持的数据集格式")
-
-    # 有效管道原型
-    steps_order_candidates = [
-        ['impute', 'encode', 'normalize', 'rebalance', 'features'],
-        ['impute', 'encode', 'normalize', 'features', 'rebalance'],
-        ['impute','encode', 'rebalance', 'discretize', 'features'],
-        ['impute','encode', 'discretize', 'features', 'rebalance'],
-        ['impute','encode', 'discretize', 'rebalance', 'features']
-    ]
-
-    best_overall = {
-        'accuracy': -np.inf,
-        'config': None,
-        'steps_order': None
-    }
-
-    for i, steps_order in enumerate(steps_order_candidates, 1):
-        print(f"\n{'='*40}\nOptimizing Pipeline Config {i}: {steps_order}\n{'='*40}")
-        
-        optimizer = BayesianPipelineOptimizer(
-            steps_order=steps_order,
-            model=RandomForestClassifier(n_estimators=50, random_state=42),
-            n_trials=30,
-            cv=3
+    def _compute_baseline(self):
+        """计算基准模型性能"""
+        baseline = clone(self.model)
+        X_train, X_test, y_train, y_test = train_test_split(
+            self.X, self.y, test_size=0.2, random_state=42
         )
-        
-        best_params, best_score = optimizer.optimize(X, y)
-        
-        if best_score > best_overall['accuracy']:
-            best_overall['accuracy'] = best_score
-            best_overall['config'] = optimizer.format_final_result()
-            best_overall['steps_order'] = steps_order
-
-    # 基准测试
-    baseline = RandomForestClassifier(n_estimators=50, random_state=42)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    baseline.fit(X_train, y_train)
-    baseline_score = accuracy_score(y_test, baseline.predict(X_test))
-
-    # 最终输出
-    print(f"\n{'='*40}")
-    print(f"Dataset: {dataset_name}")
-    print(f"Samples: {X.shape[0]}, Features: {X.shape[1]}")
-    print(f"Classes: {len(np.unique(y))}")
-    print("="*40)
-    print(f"Baseline Accuracy: {baseline_score:.4f}")
+        baseline.fit(X_train, y_train)
+        return accuracy_score(y_test, baseline.predict(X_test))
     
-    if best_overall['accuracy'] != -np.inf:
-        print(f"\n Best Optimized Accuracy: {best_overall['accuracy']:.4f}")
-        print(f" From Effective pipeline prototype: {best_overall['steps_order']}")
-        print("\n Best Configuration:")
-        print(best_overall['config'])
-    else:
-        print("\n No valid configuration found in any steps_order")
+    def optimize(self):
+        """执行管道优化"""
+        # 计算基准性能
+        self.baseline_score = self._compute_baseline()
+        
+        self.best_overall = {
+            'accuracy': -np.inf,
+            'config': None,
+            'steps_order': None
+        }
+        
+        for i, steps_order in enumerate(self.steps_order_candidates, 1):
+            print(f"\n{'='*40}\n优化管道配置 {i}: {steps_order}\n{'='*40}")
+            
+            optimizer = BayesianPipelineOptimizer(
+                steps_order=steps_order,
+                model=clone(self.model),
+                n_trials=self.n_trials,
+                cv=self.cv
+            )
+            
+            _, best_score = optimizer.optimize(self.X, self.y)
+            
+            if best_score > self.best_overall['accuracy']:
+                self.best_overall['accuracy'] = best_score
+                self.best_overall['config'] = optimizer.format_final_result()
+                self.best_overall['steps_order'] = steps_order
+    
+    def get_results(self):
+        """获取优化结果"""
+        if not self.best_overall:
+            raise RuntimeError("必须先调用 optimize() 方法获取结果")
+        
+        return {
+            "Baseline Accuracy": self.baseline_score,
+            "Best Optimized Accuracy": self.best_overall['accuracy'],
+            "Effective Pipeline Prototype": self.best_overall['steps_order'],
+            "Best Configuration": self.best_overall['config']
+        }
