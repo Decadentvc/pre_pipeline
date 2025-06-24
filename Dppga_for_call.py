@@ -24,6 +24,9 @@ import warnings
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
 
 warnings.filterwarnings('ignore', category=UserWarning)
 
@@ -102,11 +105,18 @@ class PrototypeSingleton:
 class BayesianPipelineOptimizer:
     def __init__(self, steps_order, model, n_trials=50, cv=3):
         self.steps_order = steps_order
-        self.model = model
+        self.model_type = model
         self.n_trials = n_trials
         self.cv = cv
         self.study = None
         
+        self.model_config = {
+            "RF": RandomForestClassifier(n_estimators=50, random_state=42),
+            "SVM": SVC(probability=True, random_state=42),
+            "KNN": KNeighborsClassifier(n_neighbors=5),
+            "NB": GaussianNB()
+        }
+
         self.step_types = {
             'impute': 'transformer',
             'encode': 'transformer',
@@ -122,6 +132,9 @@ class BayesianPipelineOptimizer:
         cat_steps = []
         main_steps = []
         param_mapping = {}
+
+        model_instance = self.model_config.get(self.model_type, 
+                                             self.model_config["RF"])  
 
         for step_type in self.steps_order:
             op_pool = singleton.POOL[step_type]
@@ -187,7 +200,7 @@ class BayesianPipelineOptimizer:
         
         pipeline_steps += other_steps
         pipeline_steps += resample_steps
-        pipeline_steps.append(('classifier', self.model))
+        pipeline_steps.append(('classifier', model_instance))
         
         return ImbPipeline(pipeline_steps), param_mapping
 
@@ -274,7 +287,7 @@ class BayesianPipelineOptimizer:
 
 class PipelineOptimizer:
     def __init__(self, file_path, target_column, steps_order_candidates, 
-                 n_trials=50, cv=3, model=None):
+                 n_trials=50, cv=3,  model_choices=["RF", "SVM", "KNN", "NB"]):
         """
         初始化管道优化器
         
@@ -291,10 +304,18 @@ class PipelineOptimizer:
         self.steps_order_candidates = steps_order_candidates
         self.n_trials = n_trials
         self.cv = cv
-        self.model = model if model else RandomForestClassifier(n_estimators=50, random_state=42)
+        self.model_choices = model_choices
+        
+        # 模型配置
+        self.model_config = {
+            "RF": RandomForestClassifier(n_estimators=50, random_state=42),
+            "SVM": SVC(probability=True, random_state=42),
+            "KNN": KNeighborsClassifier(n_neighbors=5),
+            "NB": GaussianNB()
+        }
         
         self.X, self.y = self._load_data()
-        self.baseline_score = None
+        self.baseline_scores = {}
         self.best_overall = None
         
     def _load_data(self):
@@ -336,42 +357,53 @@ class PipelineOptimizer:
             print(f"加载数据失败: {str(e)}")
             raise e
     
-    def _compute_baseline(self):
+    def _compute_baselines(self):
         """计算基准模型性能"""
-        baseline = clone(self.model)
         X_train, X_test, y_train, y_test = train_test_split(
             self.X, self.y, test_size=0.2, random_state=42
         )
-        baseline.fit(X_train, y_train)
-        return accuracy_score(y_test, baseline.predict(X_test))
+        
+        for model_name in self.model_choices:
+            if model_name in self.model_config:
+                model = clone(self.model_config[model_name])
+                model.fit(X_train, y_train)
+                score = accuracy_score(y_test, model.predict(X_test))
+                self.baseline_scores[model_name] = score
     
     def optimize(self):
         """执行管道优化"""
         # 计算基准性能
-        self.baseline_score = self._compute_baseline()
+        self._compute_baselines()
         
         self.best_overall = {
             'accuracy': -np.inf,
             'config': None,
-            'steps_order': None
+            'steps_order': None,
+            'model_type': None
         }
         
-        for i, steps_order in enumerate(self.steps_order_candidates, 1):
-            print(f"\n{'='*40}\n优化管道配置 {i}: {steps_order}\n{'='*40}")
-            
-            optimizer = BayesianPipelineOptimizer(
-                steps_order=steps_order,
-                model=clone(self.model),
-                n_trials=self.n_trials,
-                cv=self.cv
-            )
-            
-            _, best_score = optimizer.optimize(self.X, self.y)
-            
-            if best_score > self.best_overall['accuracy']:
-                self.best_overall['accuracy'] = best_score
-                self.best_overall['config'] = optimizer.format_final_result()
-                self.best_overall['steps_order'] = steps_order
+        for model_name in self.model_choices:
+            if model_name not in self.model_config:
+                print(f"⚠️ 未知模型类型: {model_name}, 跳过")
+                continue
+                
+            for i, steps_order in enumerate(self.steps_order_candidates, 1):
+                print(f"\n{'='*40}\n优化管道配置 {i} 使用模型 {model_name}: {steps_order}\n{'='*40}")
+                
+                optimizer = BayesianPipelineOptimizer(
+                    steps_order=steps_order,
+                    model=model_name,
+                    n_trials=self.n_trials,
+                    cv=self.cv
+                )
+                
+                _, best_score = optimizer.optimize(self.X, self.y)
+                
+                if best_score > self.best_overall['accuracy']:
+                    self.best_overall['accuracy'] = best_score
+                    self.best_overall['config'] = optimizer.format_final_result()
+                    self.best_overall['steps_order'] = steps_order
+                    self.best_overall['model_type'] = model_name
     
     def get_results(self):
         """获取优化结果"""
@@ -379,8 +411,9 @@ class PipelineOptimizer:
             raise RuntimeError("必须先调用 optimize() 方法获取结果")
         
         return {
-            "Baseline Accuracy": self.baseline_score,
+            "Baseline Scores": self.baseline_scores,
             "Best Optimized Accuracy": self.best_overall['accuracy'],
+            "Best Model Type": self.best_overall['model_type'],
             "Effective Pipeline Prototype": self.best_overall['steps_order'],
             "Best Configuration": self.best_overall['config']
         }

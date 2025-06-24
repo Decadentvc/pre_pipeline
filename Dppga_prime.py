@@ -21,6 +21,9 @@ from imblearn.under_sampling import NearMiss
 from imblearn.over_sampling import SMOTE
 from functools import partial
 import warnings
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
 
 warnings.filterwarnings('ignore', category=UserWarning)
 
@@ -97,13 +100,40 @@ class PrototypeSingleton:
         return cls._instance
 
 class BayesianPipelineOptimizer:
-    def __init__(self, steps_order, model, n_trials=50, cv=3):
+    def __init__(self, steps_order, model="RF", n_trials=50, cv=3):
         self.steps_order = steps_order
-        self.model = model
+        self.model_type = model
         self.n_trials = n_trials
         self.cv = cv
         self.study = None
         
+        # self.model_config = {
+        #     "RF": {
+        #         "class": RandomForestClassifier,
+        #         "default": RandomForestClassifier(n_estimators=50, random_state=42),
+        #         "params": {
+        #             "n_estimators": [50, 100, 200],
+        #             "max_depth": [3, 5, 10, None],
+        #             "criterion": ["gini", "entropy"]
+        #         }
+        #     },
+        #     "SVM": {
+        #         "class": SVC,
+        #         "default": SVC(probability=True, random_state=42),
+        #         "params": {
+        #             "C": [0.1, 1.0, 10.0],
+        #             "kernel": ["linear", "rbf", "poly"],
+        #             "gamma": ["scale", "auto"]
+        #         }
+        #     }
+        # }
+        self.model_config = {
+            "RF": RandomForestClassifier(n_estimators=50, random_state=42),
+            "SVM": SVC(probability=True, random_state=42),
+            "KNN": KNeighborsClassifier(n_neighbors=5),
+            "NB": GaussianNB()
+        }
+
         self.step_types = {
             'impute': 'transformer',
             'encode': 'transformer',
@@ -119,6 +149,9 @@ class BayesianPipelineOptimizer:
         cat_steps = []
         main_steps = []
         param_mapping = {}
+
+        model_instance = self.model_config.get(self.model_type, 
+                                             self.model_config["RF"])    
 
         for step_type in self.steps_order:
             op_pool = singleton.POOL[step_type]
@@ -184,7 +217,7 @@ class BayesianPipelineOptimizer:
         
         pipeline_steps += other_steps
         pipeline_steps += resample_steps
-        pipeline_steps.append(('classifier', self.model))
+        pipeline_steps.append(('classifier', model_instance))
         
         return ImbPipeline(pipeline_steps), param_mapping
 
@@ -267,6 +300,11 @@ class BayesianPipelineOptimizer:
             )
             output.append(f"{step}: {op_class.__name__}({param_str})")
         
+        model_name = self.model_type
+        if model_name in self.model_config:
+            model_class = type(self.model_config[model_name]).__name__
+            output.append(f"\nmodel: {model_class} (fixed parameters)")
+
         return "\n".join(output)
 
 if __name__ == "__main__":
@@ -381,7 +419,7 @@ if __name__ == "__main__":
         8: ("Local Dataset", None)
     }
 
-    # 数据加载逻辑（兼容本地和内置数据集）
+    # 数据加载逻辑
     if DATASET_CHOICE == 8:  # 本地数据集
         print("\n正在加载本地数据集...")
         X, y = load_local_data(
@@ -427,47 +465,78 @@ if __name__ == "__main__":
         # ['impute','encode', 'discretize', 'rebalance', 'features']
     ]
 
+    model_choices = ["RF", "SVM", "KNN", "NB"] #["RF", "SVM", "KNN", "NB"] 
     best_overall = {
         'accuracy': -np.inf,
         'config': None,
-        'steps_order': None
+        'steps_order': None,
+        'model_type': None
     }
 
-    for i, steps_order in enumerate(steps_order_candidates, 1):
-        print(f"\n{'='*40}\nOptimizing Pipeline Config {i}: {steps_order}\n{'='*40}")
-        
-        optimizer = BayesianPipelineOptimizer(
-            steps_order=steps_order,
-            model=RandomForestClassifier(n_estimators=50, random_state=42),
-            n_trials=30,
-            cv=3
-        )
-        
-        best_params, best_score = optimizer.optimize(X, y)
-        
-        if best_score > best_overall['accuracy']:
-            best_overall['accuracy'] = best_score
-            best_overall['config'] = optimizer.format_final_result()
-            best_overall['steps_order'] = steps_order
+    for model_choice in model_choices:  # 遍历模型类型
+        for i, steps_order in enumerate(steps_order_candidates, 1):
+            print(f"\n{'='*40}")
+            print(f"Optimizing Pipeline Config {i} with {model_choice}:")
+            print(f"Steps: {steps_order}\n{'='*40}")
+            
+            optimizer = BayesianPipelineOptimizer(
+                steps_order=steps_order,
+                model=model_choice,  # 传入模型类型字符串
+                n_trials=30,
+                cv=3
+            )
+            
+            best_params, best_score = optimizer.optimize(X, y)
+            
+            if best_score > best_overall['accuracy']:
+                best_overall['accuracy'] = best_score
+                best_overall['config'] = optimizer.format_final_result()
+                best_overall['steps_order'] = steps_order
+                best_overall['model_type'] = model_choice
 
     # 基准测试
-    baseline = RandomForestClassifier(n_estimators=50, random_state=42)
+    baseline_scores = []
+    
+    # 随机森林基准
+    rf = RandomForestClassifier(n_estimators=50, random_state=42)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    baseline.fit(X_train, y_train)
-    baseline_score = accuracy_score(y_test, baseline.predict(X_test))
+    rf.fit(X_train, y_train)
+    rf_score = accuracy_score(y_test, rf.predict(X_test))
+    baseline_scores.append(("RandomForest", rf_score))
+    
+    # SVM基准
+    svm = SVC(probability=True, random_state=42)
+    svm.fit(X_train, y_train)
+    svm_score = accuracy_score(y_test, svm.predict(X_test))
+    baseline_scores.append(("SVM", svm_score))
 
+    # KNN基准
+    knn = KNeighborsClassifier(n_neighbors=5)
+    knn.fit(X_train, y_train)
+    knn_score = accuracy_score(y_test, knn.predict(X_test))
+    baseline_scores.append(("KNN", knn_score))
+    
+    # Naive Bayes基准
+    nb = GaussianNB()
+    nb.fit(X_train, y_train)
+    nb_score = accuracy_score(y_test, nb.predict(X_test))
+    baseline_scores.append(("NaiveBayes", nb_score))
     # 最终输出
     print(f"\n{'='*40}")
     print(f"Dataset: {dataset_name}")
     print(f"Samples: {X.shape[0]}, Features: {X.shape[1]}")
     print(f"Classes: {len(np.unique(y))}")
     print("="*40)
-    print(f"Baseline Accuracy: {baseline_score:.4f}")
+    
+    # 输出所有基准模型成绩
+    for model_name, score in baseline_scores:
+        print(f"{model_name} Baseline Accuracy: {score:.4f}")
     
     if best_overall['accuracy'] != -np.inf:
-        print(f"\n Best Optimized Accuracy: {best_overall['accuracy']:.4f}")
-        print(f" From Effective pipeline prototype: {best_overall['steps_order']}")
-        print("\n Best Configuration:")
+        print(f"\nBest Optimized Accuracy: {best_overall['accuracy']:.4f}")
+        print(f"Model Type: {best_overall['model_type']}")
+        print(f"Effective pipeline prototype: {best_overall['steps_order']}")
+        print("\nBest Configuration:")
         print(best_overall['config'])
     else:
-        print("\n No valid configuration found in any steps_order")
+        print("\nNo valid configuration found in any steps_order")
