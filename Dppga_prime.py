@@ -107,26 +107,6 @@ class BayesianPipelineOptimizer:
         self.cv = cv
         self.study = None
         
-        # self.model_config = {
-        #     "RF": {
-        #         "class": RandomForestClassifier,
-        #         "default": RandomForestClassifier(n_estimators=50, random_state=42),
-        #         "params": {
-        #             "n_estimators": [50, 100, 200],
-        #             "max_depth": [3, 5, 10, None],
-        #             "criterion": ["gini", "entropy"]
-        #         }
-        #     },
-        #     "SVM": {
-        #         "class": SVC,
-        #         "default": SVC(probability=True, random_state=42),
-        #         "params": {
-        #             "C": [0.1, 1.0, 10.0],
-        #             "kernel": ["linear", "rbf", "poly"],
-        #             "gamma": ["scale", "auto"]
-        #         }
-        #     }
-        # }
         self.model_config = {
             "RF": RandomForestClassifier(n_estimators=50, random_state=42),
             "SVM": SVC(probability=True, random_state=42),
@@ -388,15 +368,15 @@ if __name__ == "__main__":
             traceback.print_exc()
             return None, None
 
-    # 泰坦尼克数据集加载（原有功能保留）
+    # 泰坦尼克数据集加载
     def load_titanic():
         raw = fetch_openml('titanic', version=1)
         X = raw.data[['pclass', 'age', 'sibsp', 'fare']].fillna(0).values.astype(float)
         y = (raw.target == '1').astype(int).values
         return X, y
 
-    # 数据集配置（新增本地数据集选项）
-    DATASET_CHOICE = 8  # 修改这个值切换数据集
+    # 数据集配置
+    DATASET_CHOICE = 1  # 修改这个值切换数据集
 
     datasets = {
         # 内置数据集
@@ -423,7 +403,7 @@ if __name__ == "__main__":
     if DATASET_CHOICE == 8:  # 本地数据集
         print("\n正在加载本地数据集...")
         X, y = load_local_data(
-            file_path='dataset_temp/adammaus_predicting-churn-for-bank-customers__Churn_Modelling.csv',
+            file_path='Haipipe/data/dataset/primaryobjects_voicegender/voice.csv',
             target_column='label'
         )
         
@@ -458,14 +438,15 @@ if __name__ == "__main__":
 
     # 有效管道原型
     steps_order_candidates = [
-        ['impute', 'encode', 'normalize', 'rebalance', 'features'],
+        # ['impute', 'encode', 'normalize', 'rebalance', 'features'],
         # ['impute', 'encode', 'normalize', 'features', 'rebalance'],
         # ['impute','encode', 'rebalance', 'discretize', 'features'],
         # ['impute','encode', 'discretize', 'features', 'rebalance'],
-        # ['impute','encode', 'discretize', 'rebalance', 'features']
+        # ['impute','encode', 'discretize', 'rebalance', 'features'],
+        ['impute']
     ]
 
-    model_choices = ["RF", "SVM", "KNN", "NB"] #["RF", "SVM", "KNN", "NB"] 
+    model_choices = ["RF"] #["RF", "SVM", "KNN", "NB"] 
     best_overall = {
         'accuracy': -np.inf,
         'config': None,
@@ -497,7 +478,7 @@ if __name__ == "__main__":
     # 基准测试
     baseline_scores = []
     
-    # 随机森林基准
+    # RF基准
     rf = RandomForestClassifier(n_estimators=50, random_state=42)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     rf.fit(X_train, y_train)

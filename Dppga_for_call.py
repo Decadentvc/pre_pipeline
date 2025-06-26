@@ -359,16 +359,17 @@ class PipelineOptimizer:
     
     def _compute_baselines(self):
         """计算基准模型性能"""
-        X_train, X_test, y_train, y_test = train_test_split(
-            self.X, self.y, test_size=0.2, random_state=42
-        )
-        
         for model_name in self.model_choices:
             if model_name in self.model_config:
                 model = clone(self.model_config[model_name])
-                model.fit(X_train, y_train)
-                score = accuracy_score(y_test, model.predict(X_test))
-                self.baseline_scores[model_name] = score
+                scores = cross_val_score(model, self.X, self.y, cv=self.cv, scoring='accuracy')
+                mean_score = np.mean(scores)
+                std_score = np.std(scores)
+                self.baseline_scores[model_name] = {
+                    'mean_accuracy': mean_score,
+                    'std_accuracy': std_score,
+                    'scores': scores
+                }
     
     def optimize(self):
         """执行管道优化"""
@@ -410,10 +411,24 @@ class PipelineOptimizer:
         if not self.best_overall:
             raise RuntimeError("必须先调用 optimize() 方法获取结果")
         
+        # 创建基准分数的易读格式
+        baseline_summary = {}
+        for model_name, scores in self.baseline_scores.items():
+            baseline_summary[model_name] = f"{scores['mean_accuracy']:.4f} "
+        
         return {
-            "Baseline Scores": self.baseline_scores,
-            "Best Optimized Accuracy": self.best_overall['accuracy'],
-            "Best Model Type": self.best_overall['model_type'],
-            "Effective Pipeline Prototype": self.best_overall['steps_order'],
-            "Best Configuration": self.best_overall['config']
+            "dataset_info": {
+                "file_path": self.file_path,
+                "target_column": self.target_column,
+                "num_samples": self.X.shape[0],
+                "num_features": self.X.shape[1],
+                "num_classes": len(np.unique(self.y))
+            },
+            "baseline_performance": baseline_summary,
+            "optimization_results": {
+                "accuracy": self.best_overall['accuracy'],
+                "model_type": self.best_overall['model_type'],
+                "best_steps_order": self.best_overall['steps_order'],
+                "configuration": self.best_overall['config']
+            }
         }
