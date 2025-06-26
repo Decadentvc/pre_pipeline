@@ -6,7 +6,6 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from scipy import stats
 from sklearn.ensemble import IsolationForest
-from tqdm import tqdm
 
 from Dppga_for_call import PipelineOptimizer  
 
@@ -172,18 +171,12 @@ def analyze_datasets(directory='dataset_temp', output_dir='results'):
     candidates = [['discretize', 'features'], ['features', 'discretize']]
     model_choices = ["RF", "KNN", "NB"]  # 三种算法
     
-    # 获取所有CSV文件
-    all_files = [f for f in os.listdir(directory) if f.endswith('.csv')]
-    total_datasets = len(all_files)
-    total_tasks = total_datasets * len(model_choices)
-    
-    # 创建进度条（固定在底部）
-    pbar = tqdm(total=total_tasks, desc="Overall Progress", position=0, leave=True, 
-                bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
-    
     # 遍历数据集目录
     processed_count = 0
-    for filename in all_files:
+    for filename in os.listdir(directory):
+        if not filename.endswith('.csv'):
+            continue
+            
         file_path = os.path.join(directory, filename)
         print(f"\nProcessing dataset: {filename}")
         
@@ -191,9 +184,6 @@ def analyze_datasets(directory='dataset_temp', output_dir='results'):
         features = FeatureExtractor.extract_features(file_path)
         if not features:
             print(f"⛔ Skipped {filename} due to feature extraction failure")
-            # 更新进度条（对应3个模型任务）
-            for _ in range(len(model_choices)):
-                pbar.update(1)
             continue
             
         print(f"✅ Extracted {len(features)} features for {filename}")
@@ -202,110 +192,59 @@ def analyze_datasets(directory='dataset_temp', output_dir='results'):
         dataset_results = {'dataset': filename, **features}
         
         for model_name in model_choices:
-            # 更新进度条消息
-            pbar.set_description(f"Dataset {processed_count+1}/{total_datasets} - Model {model_name}")
-            pbar.refresh()  # 立即更新显示
-            
             try:
-                # 为基准评估运行一个实例
-                print(f"🔧 Running baseline evaluation for {model_name}...")
-                optimizer_baseline = PipelineOptimizer(
+                print(f"🔧 Running pipeline optimization for {filename} with {model_name}...")
+                optimizer = PipelineOptimizer(
                     file_path=file_path,
                     target_column='label',
-                    steps_order_candidates=[candidates[0]],  # 使用第一个候选作为任意选择
-                    n_trials=0,  # 只运行基准评估
-                    cv=3,
-                    model_choices=[model_name]
+                    steps_order_candidates=candidates,
+                    n_trials=30,
+                    model_choices=[model_name]  # 每次只评估一种算法
                 )
-                optimizer_baseline.optimize()
-                baseline_result = optimizer_baseline.get_results()
-                
-                # 获取基准分数
-                baseline_score = baseline_result['baseline_performance'].get(model_name, {}).get('accuracy', 0)
-                if not baseline_score:
-                    baseline_score = 0
-                    
-                dataset_results[f'baseline_{model_name}'] = baseline_score
-                
-                # 运行两次优化 - 每个候选顺序运行一次
-                optimized_scores = []
-                for candidate in candidates:
-                    print(f"🔧 Running optimization with candidate {candidate}...")
-                    optimizer = PipelineOptimizer(
-                        file_path=file_path,
-                        target_column='label',
-                        steps_order_candidates=[candidate],
-                        n_trials=15,  # 每个候选15次试验
-                        cv=3,
-                        model_choices=[model_name]
-                    )
-                    optimizer.optimize()
-                    eval_result = optimizer.get_results()
-                    
-                    # 获取优化分数
-                    optimized_score = eval_result['optimization_results']['accuracy'] or 0
-                    if optimized_score == -np.inf:
-                        optimized_score = baseline_score  # 使用基准分数作为回退
-                    optimized_scores.append(optimized_score)
-                
-                # 从结果中提取优化分数
-                candidate1_score = optimized_scores[0]
-                candidate2_score = optimized_scores[1]
+                optimizer.optimize()
+                eval_result = optimizer.get_results()
+                print(f"🏆 Optimization completed for {filename} with {model_name}")
                 
                 # 确定获胜策略
-                if candidate1_score > baseline_score and candidate2_score > baseline_score:
-                    if abs(candidate1_score - candidate2_score) < 0.0001:  # 分数相差很小（几乎相同）
-                        strategy = 'Draw'
-                    elif candidate1_score > candidate2_score:
-                        strategy = 'discretize_first'
-                    else:
-                        strategy = 'features_first'
-                elif candidate1_score > baseline_score:
-                    strategy = 'discretize_first'
-                elif candidate2_score > baseline_score:
-                    strategy = 'features_first'
-                else:
-                    # 当['discretize','features'], ['features','discretize'], baseline三者结果相同
+                baseline_score = eval_result['Baseline Scores'].get(model_name, 0)
+                optimized_score = eval_result['Best Optimized Accuracy']
+                pipeline = eval_result['Effective Pipeline Prototype']
+                
+                if baseline_score > optimized_score:
                     strategy = 'baseline'
+                else:
+                    strategy = 'rebalance_first' if pipeline == candidates[0] else 'features_first'
                 
-                # 确定要记录的优化分数
-                if strategy == 'discretize_first':
-                    optimized_score = candidate1_score
-                elif strategy == 'features_first':
-                    optimized_score = candidate2_score
-                elif strategy == 'Draw':
-                    optimized_score = max(candidate1_score, candidate2_score)  # 取最高分
-                else:  # baseline
-                    optimized_score = baseline_score
-                
-                print(f"🏆 Results for {model_name}:")
-                print(f"  Baseline:      {baseline_score:.4f}")
-                print(f"  Candidate 1:    {candidate1_score:.4f} (discretize_first)")
-                print(f"  Candidate 2:    {candidate2_score:.4f} (features_first)")
-                print(f"  Strategy:       {strategy}")
+                improvement = optimized_score - baseline_score
+                print(f"  Baseline ({model_name}): {baseline_score:.4f}, Optimized: {optimized_score:.4f}, Improvement: {improvement:.4f}")
+                print(f"  Winning strategy: {strategy}")
                 
                 # 记录结果
-                dataset_results[f'optimized_{model_name}'] = optimized_score
-                dataset_results[f'strategy_{model_name}'] = strategy
-                dataset_results[f'config_{model_name}'] = f"Candidate 1: {candidate1_score:.4f}, Candidate 2: {candidate2_score:.4f}"  # 简化配置记录
+                dataset_results.update({
+                    f'baseline_{model_name}': baseline_score,
+                    f'optimized_{model_name}': optimized_score,
+                    f'improvement_{model_name}': improvement,
+                    f'strategy_{model_name}': strategy,
+                    f'config_{model_name}': str(eval_result['Best Configuration'])  # 确保配置可序列化
+                })
                 
             except Exception as e:
                 print(f"❌ Evaluation failed for {filename} with {model_name}: {str(e)}")
                 # 添加空结果以便继续处理
-                dataset_results[f'baseline_{model_name}'] = np.nan
-                dataset_results[f'optimized_{model_name}'] = np.nan
-                dataset_results[f'strategy_{model_name}'] = 'Draw'  # 失败视为平局
-                dataset_results[f'config_{model_name}'] = '{}'
-            
-            # 更新进度条（每个模型评估完成后）
-            pbar.update(1)
+                dataset_results.update({
+                    f'baseline_{model_name}': np.nan,
+                    f'optimized_{model_name}': np.nan,
+                    f'improvement_{model_name}': np.nan,
+                    f'strategy_{model_name}': 'failed',
+                    f'config_{model_name}': '{}'
+                })
+                continue
         
         results.append(dataset_results)
         processed_count += 1
         print(f"✔️ Completed {processed_count} datasets")
     
-    pbar.close()
-    print(f"\nTotal datasets processed: {processed_count}/{len(all_files)} csv files")
+    print(f"\nTotal datasets processed: {processed_count}/{len(os.listdir(directory))} csv files")
     
     # 转换为DataFrame并处理数据
     if not results:
@@ -320,7 +259,7 @@ def analyze_datasets(directory='dataset_temp', output_dir='results'):
     print(f"\n💾 Saved dataset information to: {dataset_info_path}")
     
     # 为PCA准备数据
-    non_feature_cols = ['dataset'] + [col for col in df.columns if any(x in col for x in ['baseline', 'optimized', 'strategy', 'config'])]
+    non_feature_cols = ['dataset'] + [col for col in df.columns if any(x in col for x in ['baseline', 'optimized', 'improvement', 'strategy', 'config'])]
     features = [col for col in df.columns if col not in non_feature_cols]
     
     if not features:
@@ -368,9 +307,9 @@ def analyze_datasets(directory='dataset_temp', output_dir='results'):
     
     color_map = {
         'baseline': '#FF6B6B',
-        'discretize_first': "#190AEB",  # 蓝色
-        'features_first': "#28EA38",    # 绿色
-        'Draw': '#000000'               # 黑色
+        'rebalance_first': "#190AEB",
+        'features_first': "#28EA38",
+        'failed': 'gray'
     }
     
     for i, model_name in enumerate(model_choices):
@@ -392,7 +331,7 @@ def analyze_datasets(directory='dataset_temp', output_dir='results'):
         
         # 添加点标签（数据集名称）
         for idx, row in df.iterrows():
-            if row[strategy_col] != 'Draw':  # 只标记非平局的点
+            if row[strategy_col] != 'failed':  # 只标记成功的点
                 ax.annotate(
                     row['dataset'], 
                     (row['x'], row['y']), 
@@ -426,24 +365,55 @@ def analyze_datasets(directory='dataset_temp', output_dir='results'):
     # 显示图表
     plt.show()
     
+    # 额外分析 - 按策略分组统计
+    strategy_summaries = []
+    for model_name in model_choices:
+        if f'improvement_{model_name}' in df.columns:
+            model_summary = df.groupby(f'strategy_{model_name}')[f'improvement_{model_name}'].agg(['mean', 'count'])
+            model_summary['algorithm'] = model_name
+            model_summary['mean'] = model_summary['mean'].apply(lambda x: f"{x:.4f}")
+            strategy_summaries.append(model_summary)
+    
+    if strategy_summaries:
+        strategy_summary = pd.concat(strategy_summaries)
+        strategy_summary_path = os.path.join(output_dir, 'strategy_summary.csv')
+        strategy_summary.to_csv(strategy_summary_path)
+        print(f"\n🧾 Strategy summary saved to: {strategy_summary_path}")
+        
+        # 打印算法策略分布
+        print("\n=== Strategy Distribution by Algorithm ===")
+        for model_name in model_choices:
+            strategy_col = f'strategy_{model_name}'
+            if strategy_col in df.columns:
+                print(f"\n{model_name} Strategy Distribution:")
+                print(df[strategy_col].value_counts())
+    
     # 返回数据框以便进一步分析
     return df
 
 if __name__ == "__main__":
     results_df = analyze_datasets(
-        directory='dataset_test_min',
-        output_dir='analysis_results_3al_rd'
+        directory='dataset_temp',
+        output_dir='analysis_results_3al'
     )
     
     if results_df is not None:
         print("\nAnalysis completed successfully!")
         
         # 打印简要结果
-        print("\n=== Strategy Distribution by Algorithm ===")
         for model_name in ["RF", "KNN", "NB"]:
             strategy_col = f'strategy_{model_name}'
             if strategy_col in results_df.columns:
                 print(f"\n{model_name} Strategy Distribution:")
                 print(results_df[strategy_col].value_counts())
+            
+            if f'improvement_{model_name}' in results_df.columns:
+                avg_improvement = results_df[f'improvement_{model_name}'].mean()
+                print(f"\n{model_name} Average Accuracy Improvement: {avg_improvement:.4f}")
+                
+                # 计算每种策略的平均改进
+                strategy_groups = results_df.groupby(strategy_col)[f'improvement_{model_name}'].agg(['mean', 'count'])
+                print(f"\n{model_name} Improvement by Strategy:")
+                print(strategy_groups)
     else:
         print("\nNo valid results were generated")
