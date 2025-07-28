@@ -1,0 +1,10 @@
+,mean,count,algorithm
+baseline,-0.0347,37,RF
+features_first,0.0099,2,RF
+rebalance_first,0.0215,9,RF
+baseline,-0.0790,10,KNN
+features_first,0.0510,11,KNN
+rebalance_first,0.0916,27,KNN
+baseline,-0.0292,18,NB
+features_first,0.0321,5,NB
+rebalance_first,0.0400,25,NB

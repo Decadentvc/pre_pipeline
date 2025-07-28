@@ -1,0 +1,4 @@
+algorithm,datasets_evaluated,baseline_wins,discretize_first_wins,features_first_wins,draws,avg_improvement,step1_better_count,step2_better_count,equal_performance
+RF,6,4,0,1,1,0.04550592687021121,0,1,5
+KNN,6,0,3,2,1,0.11274597279157132,3,2,1
+NB,6,1,0,2,3,0.042659990471800524,0,2,4
