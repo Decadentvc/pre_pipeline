@@ -1,0 +1,60 @@
+2025-05-29 15:28:17,387 - INFO - Processing: akram24_social-network-ads_Social_Network_Ads.csv
+2025-05-29 15:28:17,519 - ERROR - Evaluation failed: akram24_social-network-ads_Social_Network_Ads.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:17,519 - INFO - Processing: altruistdelhite04_loan-prediction-problem-dataset_train_u6lujuX_CVtuZ9i.csv
+2025-05-29 15:28:17,650 - ERROR - Evaluation failed: altruistdelhite04_loan-prediction-problem-dataset_train_u6lujuX_CVtuZ9i.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:17,650 - INFO - Processing: antoine62_hired_data_v1.0.csv
+2025-05-29 15:28:17,819 - ERROR - Evaluation failed: antoine62_hired_data_v1.0.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:17,820 - INFO - Processing: adammaus_predicting-churn-for-bank-customers_Churn_Modelling.csv
+2025-05-29 15:28:18,009 - ERROR - Evaluation failed: adammaus_predicting-churn-for-bank-customers_Churn_Modelling.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:18,010 - INFO - Processing: ashishs0ni_iris-dataset_Iris.csv
+2025-05-29 15:28:18,148 - ERROR - Evaluation failed: ashishs0ni_iris-dataset_Iris.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:18,148 - INFO - Processing: aljarah_xAPI-Edu-Data_xAPI-Edu-Data.csv
+2025-05-29 15:28:18,304 - ERROR - Evaluation failed: aljarah_xAPI-Edu-Data_xAPI-Edu-Data.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:18,304 - INFO - Processing: annatshngryan_heart-csv_heart.csv
+2025-05-29 15:28:18,486 - ERROR - Evaluation failed: annatshngryan_heart-csv_heart.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:18,486 - INFO - Processing: ankitshandilya_silhouette-of-vehicles-dataset_vehicle.csv
+2025-05-29 15:28:18,687 - ERROR - Evaluation failed: ankitshandilya_silhouette-of-vehicles-dataset_vehicle.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:18,687 - INFO - Processing: affablekarthik_titanic-survival-prediction_titanic_data.csv
+2025-05-29 15:28:18,843 - ERROR - Evaluation failed: affablekarthik_titanic-survival-prediction_titanic_data.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:18,843 - INFO - Processing: ajay1735_hmeq-data_hmeq.csv
+2025-05-29 15:28:19,030 - ERROR - Evaluation failed: ajay1735_hmeq-data_hmeq.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:19,030 - INFO - Processing: abhinavralhan_titanic_train.csv
+2025-05-29 15:28:19,185 - ERROR - Evaluation failed: abhinavralhan_titanic_train.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:19,185 - INFO - Processing: absenteeismatwork_Absenteeism_at_work.csv
+2025-05-29 15:28:19,364 - ERROR - Evaluation failed: absenteeismatwork_Absenteeism_at_work.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:19,364 - INFO - Processing: ashutosh94_titanic-dataset_titanictrain.csv
+2025-05-29 15:28:19,527 - ERROR - Evaluation failed: ashutosh94_titanic-dataset_titanictrain.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:19,527 - INFO - Processing: 22000-scotch-whisky-reviews_scotch_review.csv
+2025-05-29 15:28:19,700 - ERROR - Evaluation failed: 22000-scotch-whisky-reviews_scotch_review.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:19,700 - INFO - Processing: adult-income-dataset_adult.csv
+2025-05-29 15:28:19,904 - ERROR - Evaluation failed: adult-income-dataset_adult.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:19,904 - INFO - Processing: alamjane61_titanic-train_train.csv
+2025-05-29 15:28:20,069 - ERROR - Evaluation failed: alamjane61_titanic-train_train.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:20,069 - INFO - Processing: agirlcoding_all-space-missions-from-1957_Space_Corrected.csv
+2025-05-29 15:28:20,227 - ERROR - Evaluation failed: agirlcoding_all-space-missions-from-1957_Space_Corrected.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:20,227 - INFO - Processing: amanwadhwa_wine-quality-from-chemical-properties_winequality.csv
+2025-05-29 15:28:20,389 - ERROR - Evaluation failed: amanwadhwa_wine-quality-from-chemical-properties_winequality.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:20,389 - INFO - Processing: andrewmvd_udemy-courses_udemy_courses.csv
+2025-05-29 15:28:20,552 - ERROR - Evaluation failed: andrewmvd_udemy-courses_udemy_courses.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:20,552 - INFO - Processing: anshumansahu12_prediction-of-purchased-car_Social_Network_Ads.csv
+2025-05-29 15:28:20,677 - ERROR - Evaluation failed: anshumansahu12_prediction-of-purchased-car_Social_Network_Ads.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:20,677 - INFO - Processing: adult-census-income_adult.csv
+2025-05-29 15:28:20,850 - ERROR - Evaluation failed: adult-census-income_adult.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:20,850 - INFO - Processing: agirusampath_adult-dataset_adult.csv
+2025-05-29 15:28:21,030 - ERROR - Evaluation failed: agirusampath_adult-dataset_adult.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:21,030 - INFO - Processing: analyze-helpdesk-tickets_WA_Fn-UseC_-IT-Help-Desk.csv
+2025-05-29 15:28:21,214 - ERROR - Evaluation failed: analyze-helpdesk-tickets_WA_Fn-UseC_-IT-Help-Desk.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:21,215 - INFO - Processing: aashnaprasad_heart-disease-detection-dataset_datasets_33180_43520_heart.csv
+2025-05-29 15:28:21,392 - ERROR - Evaluation failed: aashnaprasad_heart-disease-detection-dataset_datasets_33180_43520_heart.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:21,392 - INFO - Processing: alihussain1993_lower-back-pain-symptoms-datasetlabelled_Dataset_spine.csv
+2025-05-29 15:28:21,571 - ERROR - Evaluation failed: alihussain1993_lower-back-pain-symptoms-datasetlabelled_Dataset_spine.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:21,571 - INFO - Processing: abalone-dataset_abalone.csv
+2025-05-29 15:28:21,731 - ERROR - Evaluation failed: abalone-dataset_abalone.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:21,731 - INFO - Processing: anuragmishra2311_restaurant-reviews_Restaurant_Reviews.csv
+2025-05-29 15:28:21,840 - ERROR - Evaluation failed: anuragmishra2311_restaurant-reviews_Restaurant_Reviews.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:21,840 - INFO - Processing: abcsds_pokemon_Pokemon.csv
+2025-05-29 15:28:22,019 - ERROR - Evaluation failed: abcsds_pokemon_Pokemon.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:22,019 - INFO - Processing: advertising_advertising.csv
+2025-05-29 15:28:22,186 - ERROR - Evaluation failed: advertising_advertising.csv - name 'detect_label_column' is not defined
+2025-05-29 15:28:22,186 - INFO - Processing: alhassanabdelglil_classification_Dataset_for_Classification.csv
+2025-05-29 15:28:22,426 - ERROR - Evaluation failed: alhassanabdelglil_classification_Dataset_for_Classification.csv - name 'detect_label_column' is not defined

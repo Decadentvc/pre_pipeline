@@ -1,0 +1,297 @@
+Date&Time,OverSpeed,Location,Duration_overspeed,speed_limit_seconds,over_speed_distance_travelled,Target
+20-07-2018 21:58,62,"NH 48,Neervalur,Kanchipuram,Tamil Nadu,India,631561",31,17.22222222,533.8888889,unsafe
+20-07-2018 22:00,61,"NH 48,Jambodai,Kanchipuram,Tamil Nadu,India,602108",1,16.94444444,16.94444444,safe
+20-07-2018 22:02,63,"Kanchipuram - Chennai Rd,Keeranallur,TamilNadu,India,602108",11,17.5,192.5,unsafe
+20-07-2018 22:08,61,"NH4,Santhavelur,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+20-07-2018 23:47,63,"NH4,Santhavelur,Kanchipuram,Tamil Nadu,India,602106",31,17.5,542.5,safe
+20-07-2018 23:48,63,"Kodambakkam - Mumbai Highwayy,Santhavelur,TamilNadu,India,602106",41,17.5,717.5,safe
+20-07-2018 23:52,61,"NH48,Pillai Chattiram,Kanchipuram,Tamil Nadu,India,602108",31,16.94444444,525.2777778,unsafe
+20-07-2018 23:53,61,"NH48,Jambodai,Kanchipuram,Tamil Nadu,India,602108",41,16.94444444,694.7222222,unsafe
+20-07-2018 23:54,61,"Kanchipuram - Chennai Rd,Jambodai,TamilNadu,India,602108",11,16.94444444,186.3888889,unsafe
+21-07-2018 00:00,61,"AH45,Illuppapattu,Kanchipuram,Tamil Nadu,India,631561",11,16.94444444,186.3888889,unsafe
+21-07-2018 00:02,61,"NH 48,Seeyati,Kanchipuram,Tamil Nadu,India,631552",11,16.94444444,186.3888889,unsafe
+21-07-2018 00:03,63,"Kanchipuram - Chennai Rd,Seeyati,TamilNadu,India,631552",11,17.5,192.5,unsafe
+21-07-2018 00:03,61,"AH45,Seeyati,Kanchipuram,Tamil Nadu,India,631552",11,16.94444444,186.3888889,unsafe
+21-07-2018 00:06,62,"NH4,Enathur,TamilNadu,India,631502",11,17.22222222,189.4444444,unsafe
+21-07-2018 05:53,61,"NH48,Illuppapattu,Kanchipuram,Tamil Nadu,India,631561",231,16.94444444,3914.166667,unsafe
+21-07-2018 05:55,63,"NH 48,Attuputhur,Kanchipuram,Tamil Nadu,India,631561",31,17.5,542.5,unsafe
+21-07-2018 05:56,62,"AH45,Neervalur,Kanchipuram,Tamil Nadu,India,631561",11,17.22222222,189.4444444,unsafe
+21-07-2018 05:58,62,"AH45,Neervalur,Kanchipuram,Tamil Nadu,India,602108",1,17.22222222,17.22222222,safe
+21-07-2018 06:00,61,"AH45,Keeranallur,Kanchipuram,Tamil Nadu,India,602108",21,16.94444444,355.8333333,us
+21-07-2018 06:01,61,"Kanchipuram - Chennai Rd,Pillai Chattiram,TamilNadu,India,602108",1,16.94444444,16.94444444,safe
+21-07-2018 06:02,62,"Kanchipuram - Chennai Rd,TamilNadu,India,602106",1,17.22222222,17.22222222,safe
+21-07-2018 06:06,61,"Kanchipuram - Chennai Rd,Molasur,TamilNadu,India,602106",31,16.94444444,525.2777778,unsafe
+21-07-2018 07:42,62,"Kodambakkam - Mumbai Highwayy,Santhavelur,TamilNadu,India,602106",11,17.22222222,189.4444444,unsafe
+21-07-2018 07:42,61,"Kanchipuram - Chennai Rd,Nandimedu,TamilNadu,India,602106",1,16.94444444,16.94444444,safe
+21-07-2018 07:43,61,"AH45,Nandimedu,Kanchipuram,Tamil Nadu,India,602106",11,16.94444444,186.3888889,unsafe
+21-07-2018 07:44,61,"NH48,Kanchipuram,Tamil Nadu,India,602106",31,16.94444444,525.2777778,unsafe
+21-07-2018 07:46,61,"Kanchipuram - Chennai Rd,Keeranallur,TamilNadu,India,602108",1,16.94444444,16.94444444,safe
+21-07-2018 07:54,61,"NH48,Illuppapattu,Kanchipuram,Tamil Nadu,India,631561",11,16.94444444,186.3888889,unsafe
+21-07-2018 07:57,61,"AH45,Seeyati,Kanchipuram,Tamil Nadu,India,631552",31,16.94444444,525.2777778,unsafe
+21-07-2018 08:00,61,"NH4,Enathur,TamilNadu,India,631502",1,16.94444444,16.94444444,safe
+21-07-2018 08:20,61,"Andal Nagar,Baluchetty Chatram,Kanchipuram,Tamil Nadu,India,631551",31,16.94444444,525.2777778,unsafe
+21-07-2018 08:20,62,"NH48,Kanchipuram,Tamil Nadu,India,631551",31,17.22222222,533.8888889,unsafe
+21-07-2018 08:21,61,"M.B.T. Road,Kanchipuram,Tamil Nadu,India,631551",1,16.94444444,16.94444444,safe
+21-07-2018 08:21,61,"Kodambakkam - Mumbai Highwayy,TamilNadu,India,631551",11,16.94444444,186.3888889,unsafe
+21-07-2018 08:22,61,"Damal Main Rd,Dhamal,Kanchipuram,Tamil Nadu,India,631551",11,16.94444444,186.3888889,unsafe
+21-07-2018 08:24,64,"Kodambakkam - Mumbai Highwayy,TamilNadu,India,631551",151,17.77777778,2684.444444,unsafe
+21-07-2018 13:04,61,"Panapakkam-Walaja Rd,Vellore,Tamil Nadu,India,631052",11,16.94444444,186.3888889,unsafe
+21-07-2018 13:23,61,"NH4,Dhamal,TamilNadu,India,631551",11,16.94444444,186.3888889,unsafe
+21-07-2018 13:25,67,"M.B.T. Road,Kanchipuram,Tamil Nadu,India,631551",141,18.61111111,2624.166667,unsafe
+21-07-2018 13:29,67,"NH48,Kilambi,Kanchipuram,Tamil Nadu,India,631502",321,18.61111111,5974.166667,unsafe
+21-07-2018 13:47,63,"NH48,Enathur,Kanchipuram,Tamil Nadu,India,631561",41,17.5,717.5,unsafe
+21-07-2018 13:48,61,"Kanchipuram - Chennai Rd,TamilNadu,India,631552",1,16.94444444,16.94444444,safe
+21-07-2018 13:50,62,"Kanchipuram - Chennai Rd,TamilNadu,India,631561",11,17.22222222,189.4444444,unsafe
+21-07-2018 13:53,61,"AH45,Illuppapattu,Kanchipuram,Tamil Nadu,India,631561",151,16.94444444,2558.611111,unsafe
+21-07-2018 13:56,62,"Kanchipuram - Chennai Rd,Chinnaiyan Chatram,Neervalur,TamilNadu,India,631561",321,17.22222222,5528.333333,unsafe
+21-07-2018 14:00,62,"Kanchipuram - Chennai Rd,Pillai Chattiram,TamilNadu,India,602108",31,17.22222222,533.8888889,unsafe
+21-07-2018 14:02,63,"Kanchipuram - Chennai Rd,Nandimedu,TamilNadu,India,602106",21,17.5,367.5,unsafe
+21-07-2018 14:04,65,"Kanchipuram - Chennai Rd,Molasur,TamilNadu,India,602106",41,18.05555556,740.2777778,unsafe
+21-07-2018 14:05,62,"NH48,Molasur,Kanchipuram,Tamil Nadu,India,602106",1,17.22222222,17.22222222,safe
+21-07-2018 15:41,62,"NH48,Santhavelur,Kanchipuram,Tamil Nadu,India,602106",21,17.22222222,361.6666667,unsafe
+21-07-2018 15:43,61,"NH48,Nandimedu,Kanchipuram,Tamil Nadu,India,602106",21,16.94444444,355.8333333,unsafe
+21-07-2018 15:43,61,"AH45,Nandimedu,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+21-07-2018 15:45,63,"Kanchipuram - Chennai Rd,Pillai Chattiram,TamilNadu,India,602108",31,17.5,542.5,unsafe
+21-07-2018 15:47,61,"AH45,Jambodai,Kanchipuram,Tamil Nadu,India,602108",21,16.94444444,355.8333333,unsafe
+21-07-2018 15:48,62,"NH48,Neervalur,Kanchipuram,Tamil Nadu,India,602108",21,17.22222222,361.6666667,unsafe
+21-07-2018 15:50,61,"Kanchipuram - Chennai Rd,Neervalur,TamilNadu,India,631561",121,16.94444444,2050.277778,unsafe
+21-07-2018 15:51,61,"Kanchipuram - Chennai Rd,Attuputhur,TamilNadu,India,631561",1,16.94444444,16.94444444,safe
+21-07-2018 15:51,62,"Chennai - Bengaluru Hwy,Attuputhur,Kanchipuram,Tamil Nadu,India,631561",1,17.22222222,17.22222222,safe
+21-07-2018 15:56,61,"NH48,Kanchipuram,Tamil Nadu,India,631561",1,16.94444444,16.94444444,safe
+21-07-2018 15:56,61,"Kanchipuram - Chennai Rd,TamilNadu,India,631561",1,16.94444444,16.94444444,safe
+21-07-2018 15:57,61,"Kanchipuram - Chennai Rd,Seeyati,TamilNadu,India,631552",1,16.94444444,16.94444444,safe
+21-07-2018 16:26,62,"NH 48,Kanchipuram,Tamil Nadu,India,631551",121,17.22222222,2083.888889,unsafe
+21-07-2018 22:04,61,"Kanchipuram - Chennai Rd,Pillai Chattiram,TamilNadu,India,602108",1,16.94444444,16.94444444,safe
+21-07-2018 23:44,61,"Kodambakkam - Mumbai Highwayy,Santhavelur,TamilNadu,India,602106",11,16.94444444,186.3888889,safe
+22-07-2018 07:48,61,"Kanchipuram - Chennai Rd,Molasur,TamilNadu,India,602106",1,16.94444444,16.94444444,safe
+22-07-2018 07:49,61,"AH45,Santhavelur,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+22-07-2018 07:50,61,"NH48,Santhavelur,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+22-07-2018 07:51,62,"Kanchipuram - Chennai Rd,Nandimedu,TamilNadu,India,602106",41,17.22222222,706.1111111,safe
+22-07-2018 07:52,61,"AH45,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+22-07-2018 07:53,62,"Kanchipuram - Chennai Rd,TamilNadu,India,602106",21,17.22222222,361.6666667,safe
+22-07-2018 07:53,61,"NH48,Pillai Chattiram,Kanchipuram,Tamil Nadu,India,602108",1,16.94444444,16.94444444,safe
+22-07-2018 07:58,61,"AH45,Neervalur,Kanchipuram,Tamil Nadu,India,631561",41,16.94444444,694.7222222,safe
+22-07-2018 08:00,61,"MDR791,Attuputhur,Kanchipuram,Tamil Nadu,India,631561",11,16.94444444,186.3888889,safe
+22-07-2018 08:03,61,"Kanchipuram - Chennai Rd,TamilNadu,India,631561",231,16.94444444,3914.166667,unsafe
+22-07-2018 08:05,61,"NH48,Seeyati,Kanchipuram,Tamil Nadu,India,631552",1,16.94444444,16.94444444,safe
+23-07-2018 05:21,61,"NH48,Kanchipuram,Tamil Nadu,India,631551",1,16.94444444,16.94444444,safe
+23-07-2018 05:22,61,"Andal Nagar,Baluchetty Chatram,Kanchipuram,Tamil Nadu,India,631551",1,16.94444444,16.94444444,safe
+23-07-2018 05:23,61,"NH4,Sirunaiperugal,TamilNadu,India,631551",21,16.94444444,355.8333333,safe
+23-07-2018 05:24,63,"NH48,Sirunaiperugal,Kanchipuram,Tamil Nadu,India,631502",31,17.5,542.5,unsafe
+23-07-2018 05:47,61,"AH45,Kanchipuram,Tamil Nadu,India,631561",1,16.94444444,16.94444444,safe
+23-07-2018 05:56,61,"AH45,Keeranallur,Kanchipuram,Tamil Nadu,India,602108",11,16.94444444,186.3888889,safe
+23-07-2018 06:02,61,"NH4,Santhavelur,Kanchipuram,Tamil Nadu,India,602106",11,16.94444444,186.3888889,safe
+23-07-2018 13:14,61,"NH4,Dhamal,TamilNadu,India,631551",11,16.94444444,186.3888889,safe
+23-07-2018 13:20,61,"NH4,Sirunaiperugal,TamilNadu,India,631502",21,16.94444444,355.8333333,safe
+23-07-2018 13:39,61,"NH48,Enathur,Kanchipuram,Tamil Nadu,India,631561",1,16.94444444,16.94444444,safe
+23-07-2018 13:48,62,"NH48,Neervalur,Kanchipuram,Tamil Nadu,India,631561",11,17.22222222,189.4444444,safe
+23-07-2018 13:59,62,"Kanchipuram - Chennai Rd,Molasur,TamilNadu,India,602106",11,17.22222222,189.4444444,safe
+23-07-2018 15:45,63,"Kanchipuram - Chennai Rd,Molasur,TamilNadu,India,602106",31,17.5,542.5,unsafe
+23-07-2018 15:46,62,"NH48,Santhavelur,Kanchipuram,Tamil Nadu,India,602106",21,17.22222222,361.6666667,safe
+23-07-2018 15:48,62,"NH48,Nandimedu,Kanchipuram,Tamil Nadu,India,602106",11,17.22222222,189.4444444,safe
+23-07-2018 15:48,61,"AH45,Nandimedu,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+23-07-2018 15:49,61,"AH45,Kanchipuram,Tamil Nadu,India,602106",11,16.94444444,186.3888889,safe
+23-07-2018 15:50,61,"Kanchipuram - Chennai Rd,Pillai Chattiram,TamilNadu,India,602108",1,16.94444444,16.94444444,safe
+23-07-2018 15:52,62,"AH45,Jambodai,Kanchipuram,Tamil Nadu,India,602108",41,17.22222222,706.1111111,safe
+23-07-2018 15:54,61,"NH48,Neervalur,Kanchipuram,Tamil Nadu,India,631561",11,16.94444444,186.3888889,safe
+23-07-2018 15:56,61,"Chennai - Bengaluru Hwy,Attuputhur,Kanchipuram,Tamil Nadu,India,631561",31,16.94444444,525.2777778,safe
+23-07-2018 15:58,61,"Kanchipuram - Chennai Rd,Illuppapattu,TamilNadu,India,631561",21,16.94444444,355.8333333,safe
+23-07-2018 22:06,61,"AH45,Molasur,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+23-07-2018 23:48,64,"AH45,Molasur,Kanchipuram,Tamil Nadu,India,602106",11,17.77777778,195.5555556,unsafe
+23-07-2018 23:50,61,"AH45,Nandimedu,Kanchipuram,Tamil Nadu,India,602106",21,16.94444444,355.8333333,safe
+23-07-2018 23:52,61,"Kanchipuram - Chennai Rd,TamilNadu,India,602106",41,16.94444444,694.7222222,safe
+23-07-2018 23:53,63,"Kanchipuram - Chennai Rd,Pillai Chattiram,TamilNadu,India,602108",11,17.5,192.5,unsafe
+23-07-2018 23:55,61,"NH48,Neervalur,Kanchipuram,Tamil Nadu,India,602108",21,16.94444444,355.8333333,safe
+23-07-2018 23:57,62,"NH48,Neervalur,Kanchipuram,Tamil Nadu,India,631561",1,17.22222222,17.22222222,safe
+24-07-2018 06:07,61,"AH45,Molasur,Kanchipuram,Tamil Nadu,India,602106",21,16.94444444,355.8333333,safe
+24-07-2018 13:17,61,"NH 48,Kanchipuram,Tamil Nadu,India,631551",1,16.94444444,16.94444444,safe
+24-07-2018 13:18,62,"NH48,Dhamal,Kanchipuram,Tamil Nadu,India,631551",11,17.22222222,189.4444444,safe
+24-07-2018 13:20,61,"M.B.T. Road,Kanchipuram,Tamil Nadu,India,631551",21,16.94444444,355.8333333,safe
+24-07-2018 13:21,62,"NH48,Thiruppukuzhi,Kanchipuram,Tamil Nadu,India,631551",11,17.22222222,189.4444444,safe
+24-07-2018 13:22,61,"NH48,Sirunaiperugal,Kanchipuram,Tamil Nadu,India,631551",1,16.94444444,16.94444444,safe
+24-07-2018 13:24,64,"NH48,Kilambi,Kanchipuram,Tamil Nadu,India,631502",131,17.77777778,2328.888889,unsafe
+24-07-2018 13:41,62,"NH4,Enathur,TamilNadu,India,631502",1,17.22222222,17.22222222,safe
+24-07-2018 13:47,62,"Kanchipuram - Chennai Rd,TamilNadu,India,631561",21,17.22222222,361.6666667,safe
+24-07-2018 13:58,62,"Kanchipuram - Chennai Rd,Pillai Chattiram,TamilNadu,India,602108",1,17.22222222,17.22222222,safe
+24-07-2018 13:58,61,"Kanchipuram - Chennai Rd,TamilNadu,India,602106",1,16.94444444,16.94444444,safe
+24-07-2018 14:03,61,"NH48,Santhavellore,Kanchipuram,Tamil Nadu,India,602106",11,16.94444444,186.3888889,safe
+24-07-2018 16:39,63,"NH4,TamilNadu,India,631551",221,17.5,3867.5,unsafe
+24-07-2018 23:49,61,"Kanchipuram - Chennai Rd,Nandimedu,TamilNadu,India,602106",21,16.94444444,355.8333333,safe
+25-07-2018 05:26,63,"Kodambakkam - Mumbai Highwayy,TamilNadu,India,631551",1,17.5,17.5,unsafe
+25-07-2018 05:30,61,"AH45,Sirunaiperugal,Kanchipuram,Tamil Nadu,India,631502",1,16.94444444,16.94444444,safe
+25-07-2018 05:30,61,"NH48,Kilambi,Kanchipuram,Tamil Nadu,India,631502",1,16.94444444,16.94444444,safe
+25-07-2018 05:57,63,"AH45,Attuputhur,Kanchipuram,Tamil Nadu,India,631561",21,17.5,367.5,unsafe
+25-07-2018 05:58,61,"NH 48,Attuputhur,Kanchipuram,Tamil Nadu,India,631561",1,16.94444444,16.94444444,safe
+25-07-2018 06:00,62,"Chennai - Bengaluru Highway,Neervalur,Kanchipuram,Tamil Nadu,India,631561",11,17.22222222,189.4444444,safe
+25-07-2018 06:01,62,"AH45,Jambodai,Kanchipuram,Tamil Nadu,India,602108",11,17.22222222,189.4444444,safe
+25-07-2018 06:10,63,"NH4,Molasur,Kanchipuram,Tamil Nadu,India,602106",1,17.5,17.5,unsafe
+25-07-2018 06:10,61,"NH48,Thirumangalam,Kanchipuram,Tamil Nadu,India,602106",11,16.94444444,186.3888889,safe
+25-07-2018 07:58,62,"Kanchipuram - Chennai Rd,Nandimedu,TamilNadu,India,602106",11,17.22222222,189.4444444,safe
+25-07-2018 07:59,61,"AH45,Nandimedu,Kanchipuram,Tamil Nadu,India,602106",31,16.94444444,525.2777778,unsafe
+25-07-2018 08:03,61,"NH48,Jambodai,Kanchipuram,Tamil Nadu,India,602108",41,16.94444444,694.7222222,safe
+25-07-2018 08:10,63,"Kanchipuram - Chennai Rd,Illuppapattu,Kanchipuram,Tamil Nadu,India,631561",11,17.5,192.5,unsafe
+25-07-2018 08:46,61,"NH48,Sirunaiperugal,Kanchipuram,Tamil Nadu,India,631551",31,16.94444444,525.2777778,safe
+25-07-2018 08:50,62,"AH45,Kanchipuram,Tamil Nadu,India,631551",1,17.22222222,17.22222222,safe
+25-07-2018 08:50,61,"NH48,Dhamal,Kanchipuram,Tamil Nadu,India,631551",1,16.94444444,16.94444444,safe
+25-07-2018 08:52,61,"NH4,TamilNadu,India,631551",111,16.94444444,1880.833333,safe
+25-07-2018 13:22,61,"AH45,Thiruppukuzhi,Kanchipuram,Tamil Nadu,India,631551",11,16.94444444,186.3888889,safe
+25-07-2018 13:24,61,"NH4,Sirunaiperugal,TamilNadu,India,631502",1,16.94444444,16.94444444,safe
+25-07-2018 13:52,61,"MDR791,Attuputhur,Kanchipuram,Tamil Nadu,India,631561",1,16.94444444,16.94444444,safe
+25-07-2018 13:53,63,"NH48,Neervalur,Kanchipuram,Tamil Nadu,India,631561",31,17.5,542.5,unsafe
+25-07-2018 13:56,62,"AH45,Jambodai,Kanchipuram,Tamil Nadu,India,602108",31,17.22222222,533.8888889,safe
+25-07-2018 13:57,62,"AH45,Keeranallur,Kanchipuram,Tamil Nadu,India,602108",31,17.22222222,533.8888889,safe
+25-07-2018 15:49,61,"Kanchipuram - Chennai Rd,Molasur,TamilNadu,India,602106",1,16.94444444,16.94444444,safe
+25-07-2018 15:53,61,"AH45,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+25-07-2018 16:03,61,"AH45,Illuppapattu,Kanchipuram,Tamil Nadu,India,631561",1,16.94444444,16.94444444,safe
+25-07-2018 16:05,62,"AH45,Kanchipuram,Tamil Nadu,India,631561",11,17.22222222,189.4444444,unsafe
+25-07-2018 16:31,65,"NH4,Thiruppukuzhi,TamilNadu,India,631551",121,18.05555556,2184.722222,unsafe
+25-07-2018 16:35,63,"AH45,Dhamal,Kanchipuram,Tamil Nadu,India,631551",11,17.5,192.5,unsafe
+25-07-2018 23:55,61,"Kanchipuram - Chennai Rd,Chinnaiyan Chatram,Neervalur,TamilNadu,India,631561",1,16.94444444,16.94444444,safe
+26-07-2018 00:00,61,"AH45,Illuppapattu,Kanchipuram,Tamil Nadu,India,631561",1,16.94444444,16.94444444,safe
+26-07-2018 00:01,62,"Kanchipuram - Chennai Rd,TamilNadu,India,631561",21,17.22222222,361.6666667,safe
+26-07-2018 05:52,61,"Kanchipuram - Chennai Rd,TamilNadu,India,631561",31,16.94444444,525.2777778,safe
+26-07-2018 05:54,61,"NH48,Attuputhur,Kanchipuram,Tamil Nadu,India,631561",41,16.94444444,694.7222222,safe
+26-07-2018 05:58,61,"Kanchipuram - Chennai Rd,Neervalur,TamilNadu,India,631561",1,16.94444444,16.94444444,safe
+26-07-2018 06:01,61,"NH48,Pillai Chattiram,Kanchipuram,Tamil Nadu,India,602108",21,16.94444444,355.8333333,safe
+26-07-2018 06:03,61,"AH45,Kanchipuram,Tamil Nadu,India,602106",21,16.94444444,355.8333333,safe
+26-07-2018 06:03,61,"AH45,Nandimedu,Kanchipuram,Tamil Nadu,India,602106",11,16.94444444,186.3888889,safe
+26-07-2018 06:08,63,"NH48,Molasur,Kanchipuram,Tamil Nadu,India,602106",1,17.5,17.5,safe
+26-07-2018 07:48,62,"Kodambakkam - Mumbai Highwayy,Santhavelur,TamilNadu,India,602106",31,17.22222222,533.8888889,safe
+26-07-2018 07:51,61,"NH48,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+26-07-2018 07:54,62,"AH45,Jambodai,Kanchipuram,Tamil Nadu,India,602108",11,17.22222222,189.4444444,safe
+26-07-2018 07:56,62,"Kanchipuram - Chennai Rd,Neervalur,TamilNadu,India,631561",1,17.22222222,17.22222222,safe
+26-07-2018 07:58,62,"AH45,Attuputhur,Kanchipuram,Tamil Nadu,India,631561",51,17.22222222,878.3333333,safe
+26-07-2018 08:01,61,"AH45,Illuppapattu,Kanchipuram,Tamil Nadu,India,631561",151,16.94444444,2558.611111,safe
+26-07-2018 08:01,61,"Kanchipuram - Chennai Rd,TamilNadu,India,631561",11,16.94444444,186.3888889,safe
+26-07-2018 08:02,61,"Kanchipuram - Chennai Rd,TamilNadu,India,631561",21,16.94444444,355.8333333,safe
+27-07-2018 00:36,65,"NH48,Enathur,Kanchipuram,Tamil Nadu,India,631502",11,18.05555556,198.6111111,unsafe
+27-07-2018 01:01,67,"NH4,Dhamal,TamilNadu,India,631551",431,18.61111111,8021.388889,unsafe
+27-07-2018 01:02,63,"Kodambakkam - Mumbai Highwayy,TamilNadu,India,631551",31,17.5,542.5,unsafe
+27-07-2018 06:10,61,"AH45,Molasur,Kanchipuram,Tamil Nadu,India,602106",11,16.94444444,186.3888889,safe
+27-07-2018 07:49,61,"Kanchipuram - Chennai Rd,Molasur,TamilNadu,India,602106",1,16.94444444,16.94444444,safe
+27-07-2018 07:51,61,"NH48,Santhavelur,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+27-07-2018 08:09,61,"NH48,Kanchipuram,Tamil Nadu,India,631552",1,16.94444444,16.94444444,safe
+27-07-2018 14:09,61,"AH45,Molasur,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+27-07-2018 23:56,61,"Kanchipuram - Chennai Rd,Neervalur,TamilNadu,India,631561",1,16.94444444,16.94444444,safe
+28-07-2018 06:04,61,"Kanchipuram - Chennai Rd,Molasur,TamilNadu,India,602106",21,16.94444444,355.8333333,safe
+28-07-2018 07:48,62,"AH45,Santhavelur,Kanchipuram,Tamil Nadu,India,602106",1,17.22222222,17.22222222,safe
+28-07-2018 07:59,61,"NH48,Attuputhur,Kanchipuram,Tamil Nadu,India,631561",1,16.94444444,16.94444444,safe
+28-07-2018 08:03,62,"Kodambakkam - Mumbai Highwayy,Seeyati,TamilNadu,India,631552",1,17.22222222,17.22222222,safe
+28-07-2018 13:25,63,"Damal Main Rd,Dhamal,Kanchipuram,Tamil Nadu,India,631551",21,17.5,367.5,unsafe
+28-07-2018 13:26,61,"AH45,Kanchipuram,Tamil Nadu,India,631551",1,16.94444444,16.94444444,safe
+28-07-2018 13:26,61,"Kodambakkam - Mumbai Highwayy,TamilNadu,India,631551",1,16.94444444,16.94444444,safe
+28-07-2018 13:26,61,"M.B.T. Road,Kanchipuram,Tamil Nadu,India,631551",1,16.94444444,16.94444444,safe
+28-07-2018 13:27,61,"Voc St,Kanchipuram,Tamil Nadu,India,631551",1,16.94444444,16.94444444,safe
+28-07-2018 13:28,63,"NH4,Thiruppukuzhi,TamilNadu,India,631551",11,17.5,192.5,unsafe
+28-07-2018 13:29,61,"NH48,Sirunaiperugal,Kanchipuram,Tamil Nadu,India,631502",41,16.94444444,694.7222222,safe
+28-07-2018 13:31,61,"NH4,Kilambi,TamilNadu,India,631502",31,16.94444444,525.2777778,safe
+28-07-2018 14:01,62,"Kanchipuram - Chennai Rd,Illuppapattu,TamilNadu,India,631561",1,17.22222222,17.22222222,safe
+28-07-2018 14:04,61,"Kanchipuram - Chennai Rd,Neervalur,TamilNadu,India,631561",151,16.94444444,2558.611111,safe
+28-07-2018 14:06,61,"Kanchipuram - Chennai Rd,Chinnaiyan Chatram,Neervalur,TamilNadu,India,631561",1,16.94444444,16.94444444,safe
+28-07-2018 14:06,62,"Chennai - Bengaluru Highway,Neervalur,Kanchipuram,Tamil Nadu,India,631561",1,17.22222222,17.22222222,safe
+28-07-2018 14:08,61,"AH45,Keeranallur,Kanchipuram,Tamil Nadu,India,602108",21,16.94444444,355.8333333,safe
+28-07-2018 14:09,61,"NH48,Pillai Chattiram,Kanchipuram,Tamil Nadu,India,602108",1,16.94444444,16.94444444,safe
+28-07-2018 14:12,63,"Kanchipuram - Chennai Rd,Nandimedu,TamilNadu,India,602106",1,17.5,17.5,unsafe
+28-07-2018 14:14,66,"AH45,Molasur,Kanchipuram,Tamil Nadu,India,602106",21,18.33333333,385,unsafe
+28-07-2018 14:15,67,"NH48,Molasur,Kanchipuram,Tamil Nadu,India,602106",31,18.61111111,576.9444444,unsafe
+28-07-2018 19:37,61,"SH 120,Ulundai,TamilNadu,India,602108",1,16.94444444,16.94444444,safe
+28-07-2018 23:46,61,"AH45,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+28-07-2018 23:52,61,"NH48,Neervalur,Kanchipuram,Tamil Nadu,India,631561",1,16.94444444,16.94444444,safe
+29-07-2018 07:52,63,"NH48,Jambodai,Kanchipuram,Tamil Nadu,India,602108",31,17.5,542.5,unsafe
+29-07-2018 07:53,62,"NH48,Neervalur,Kanchipuram,Tamil Nadu,India,602108",31,17.22222222,533.8888889,safe
+29-07-2018 07:55,62,"AH45,Neervalur,Kanchipuram,Tamil Nadu,India,631561",11,17.22222222,189.4444444,safe
+29-07-2018 07:56,61,"Chennai - Bengaluru Hwy,Attuputhur,Kanchipuram,Tamil Nadu,India,631561",51,16.94444444,864.1666667,safe
+29-07-2018 07:57,63,"AH45,Illuppapattu,Kanchipuram,Tamil Nadu,India,631561",11,17.5,192.5,unsafe
+29-07-2018 08:00,62,"NH48,Kanchipuram,Tamil Nadu,India,631561",41,17.22222222,706.1111111,safe
+29-07-2018 08:01,61,"Kodambakkam - Mumbai Highwayy,Seeyati,TamilNadu,India,631552",1,16.94444444,16.94444444,safe
+29-07-2018 08:24,61,"NH4,Sirunaiperugal,TamilNadu,India,631502",1,16.94444444,16.94444444,safe
+29-07-2018 08:28,61,"NH48,Dhamal,Kanchipuram,Tamil Nadu,India,631551",1,16.94444444,16.94444444,safe
+30-07-2018 04:58,61,"Panapakkam-Walaja Rd,Vellore,Tamil Nadu,India,631052",1,16.94444444,16.94444444,safe
+30-07-2018 08:11,61,"AH45,Jambodai,Kanchipuram,Tamil Nadu,India,602108",21,16.94444444,355.8333333,safe
+30-07-2018 08:18,61,"Kanchipuram - Chennai Rd,Illuppapattu,TamilNadu,India,631561",111,16.94444444,1880.833333,safe
+30-07-2018 08:20,61,"Kodambakkam - Mumbai Highwayy,Seeyati,TamilNadu,India,631552",1,16.94444444,16.94444444,safe
+30-07-2018 08:53,61,"NH48,Dhamal,Kanchipuram,Tamil Nadu,India,631551",41,16.94444444,694.7222222,safe
+30-07-2018 08:54,61,"AH45,Dhamal,Kanchipuram,Tamil Nadu,India,631551",1,16.94444444,16.94444444,safe
+30-07-2018 08:54,61,"NH4,TamilNadu,India,631551",11,16.94444444,186.3888889,safe
+30-07-2018 13:18,61,"M.B.T. Road,Kanchipuram,Tamil Nadu,India,631551",31,16.94444444,525.2777778,safe
+30-07-2018 13:21,62,"NH4,Sirunaiperugal,TamilNadu,India,631502",21,17.22222222,361.6666667,safe
+30-07-2018 13:21,61,"NH48,Sirunaiperugal,Kanchipuram,Tamil Nadu,India,631502",1,16.94444444,16.94444444,safe
+30-07-2018 13:44,63,"Kanchipuram - Chennai Rd,TamilNadu,India,631552",21,17.5,367.5,unsafe
+30-07-2018 14:03,62,"NH48,Molasur,Kanchipuram,Tamil Nadu,India,602106",41,17.22222222,706.1111111,safe
+30-07-2018 14:03,62,"NH48,Molasur,Kanchipuram,Tamil Nadu,India,602106",11,17.22222222,189.4444444,safe
+30-07-2018 21:16,65,"AH45,Dhamal,Kanchipuram,Tamil Nadu,India,631551",11,18.05555556,198.6111111,unsafe
+30-07-2018 23:49,63,"AH45,Nandimedu,Kanchipuram,Tamil Nadu,India,602106",11,17.5,192.5,unsafe
+31-07-2018 05:46,63,"AH45,Enathur,Kanchipuram,Tamil Nadu,India,631561",1,17.5,17.5,unsafe
+31-07-2018 05:53,61,"AH45,Illuppapattu,Kanchipuram,Tamil Nadu,India,631561",131,16.94444444,2219.722222,safe
+31-07-2018 05:54,61,"AH45,Illuppapattu,Kanchipuram,Tamil Nadu,India,631561",21,16.94444444,355.8333333,safe
+31-07-2018 05:55,61,"AH45,Illuppapattu,Kanchipuram,Tamil Nadu,India,631561",1,16.94444444,16.94444444,safe
+31-07-2018 05:57,62,"NH48,Neervalur,Kanchipuram,Tamil Nadu,India,631561",11,17.22222222,189.4444444,safe
+31-07-2018 05:57,61,"AH45,Neervalur,Kanchipuram,Tamil Nadu,India,631561",1,16.94444444,16.94444444,safe
+31-07-2018 06:01,61,"NH48,Jambodai,Kanchipuram,Tamil Nadu,India,602108",11,16.94444444,186.3888889,safe
+31-07-2018 06:03,64,"Kanchipuram - Chennai Rd,TamilNadu,India,602106",151,17.77777778,2684.444444,unsafe
+31-07-2018 06:04,61,"NH48,Nandimedu,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+31-07-2018 06:07,61,"Kanchipuram - Chennai Rd,Molasur,TamilNadu,India,602106",31,16.94444444,525.2777778,safe
+31-07-2018 07:51,61,"Kanchipuram - Chennai Rd,Molasur,TamilNadu,India,602106",51,16.94444444,864.1666667,safe
+31-07-2018 07:53,64,"Kanchipuram - Chennai Rd,Nandimedu,TamilNadu,India,602106",21,17.77777778,373.3333333,unsafe
+31-07-2018 07:56,65,"NH48,Pillai Chattiram,Kanchipuram,Tamil Nadu,India,602108",211,18.05555556,3809.722222,unsafe
+31-07-2018 08:01,62,"Kanchipuram - Chennai Rd,Neervalur,TamilNadu,India,631561",1,17.22222222,17.22222222,safe
+31-07-2018 08:01,62,"AH45,Neervalur,Kanchipuram,Tamil Nadu,India,631561",11,17.22222222,189.4444444,safe
+31-07-2018 08:12,63,"AH45,Enathur,Kanchipuram,Tamil Nadu,India,631502",21,17.5,367.5,unsafe
+31-07-2018 08:45,61,"M.B.T. Road,Kanchipuram,Tamil Nadu,India,631551",1,16.94444444,16.94444444,safe
+31-07-2018 08:46,63,"Damal Main Rd,Dhamal,Kanchipuram,Tamil Nadu,India,631551",21,17.5,367.5,safe
+31-07-2018 13:17,63,"Kodambakkam - Mumbai Highwayy,TamilNadu,India,631551",141,17.5,2467.5,safe
+31-07-2018 13:19,61,"NH4,Thiruppukuzhi,TamilNadu,India,631551",1,16.94444444,16.94444444,safe
+31-07-2018 13:20,65,"NH4,Sirunaiperugal,TamilNadu,India,631502",11,18.05555556,198.6111111,unsafe
+31-07-2018 13:56,62,"Kanchipuram - Chennai Rd,Keeranallur,TamilNadu,India,602108",41,17.22222222,706.1111111,safe
+01-08-2018 06:00,64,"Kodambakkam - Mumbai Highwayy,Seeyati,TamilNadu,India,631552",21,17.77777778,373.3333333,unsafe
+01-08-2018 07:52,61,"Kanchipuram - Chennai Rd,Molasur,TamilNadu,India,602106",1,16.94444444,16.94444444,safe
+01-08-2018 07:54,64,"Kodambakkam - Mumbai Highwayy,Santhavelur,TamilNadu,India,602106",41,17.77777778,728.8888889,unsafe
+01-08-2018 07:56,63,"AH45,Kanchipuram,Tamil Nadu,India,602106",11,17.5,192.5,unsafe
+01-08-2018 07:58,62,"Kanchipuram - Chennai Rd,Keeranallur,TamilNadu,India,602108",41,17.22222222,706.1111111,safe
+01-08-2018 07:59,61,"AH45,Jambodai,Kanchipuram,Tamil Nadu,India,602108",21,16.94444444,355.8333333,safe
+01-08-2018 08:03,61,"AH45,Neervalur,Kanchipuram,Tamil Nadu,India,631561",11,16.94444444,186.3888889,safe
+01-08-2018 08:05,61,"NH48,Attuputhur,Kanchipuram,Tamil Nadu,India,631561",141,16.94444444,2389.166667,safe
+01-08-2018 08:08,62,"Kodambakkam - Mumbai Highwayy,Seeyati,TamilNadu,India,631552",51,17.22222222,878.3333333,safe
+01-08-2018 08:13,62,"NH4,Enathur,TamilNadu,India,631502",31,17.22222222,533.8888889,safe
+01-08-2018 08:35,62,"NH48,Kanchipuram,Tamil Nadu,India,631551",11,17.22222222,189.4444444,safe
+01-08-2018 08:36,61,"AH45,Kanchipuram,Tamil Nadu,India,631551",51,16.94444444,864.1666667,safe
+01-08-2018 08:37,63,"AH45,Dhamal,Kanchipuram,Tamil Nadu,India,631551",51,17.5,892.5,safe
+01-08-2018 13:22,62,"M.B.T. Road,Kanchipuram,Tamil Nadu,India,631551",21,17.22222222,361.6666667,safe
+01-08-2018 13:23,61,"Voc St,Kanchipuram,Tamil Nadu,India,631551",1,16.94444444,16.94444444,safe
+01-08-2018 13:26,61,"AH45,Sirunaiperugal,Kanchipuram,Tamil Nadu,India,631502",221,16.94444444,3744.722222,safe
+01-08-2018 13:51,62,"Kanchipuram - Chennai Rd,TamilNadu,India,631561",31,17.22222222,533.8888889,safe
+01-08-2018 13:55,62,"Kanchipuram - Chennai Rd,Neervalur,TamilNadu,India,631561",111,17.22222222,1911.666667,safe
+01-08-2018 14:01,65,"NH48,Pillai Chattiram,Kanchipuram,Tamil Nadu,India,602108",21,18.05555556,379.1666667,unsafe
+01-08-2018 14:03,62,"AH45,Kanchipuram,Tamil Nadu,India,602106",111,17.22222222,1911.666667,safe
+01-08-2018 14:05,61,"Kodambakkam - Mumbai Highwayy,Santhavelur,TamilNadu,India,602106",11,16.94444444,186.3888889,safe
+01-08-2018 14:06,63,"Kanchipuram - Chennai Rd,Molasur,TamilNadu,India,602106",11,17.5,192.5,safe
+01-08-2018 14:07,62,"NH48,Molasur,Kanchipuram,Tamil Nadu,India,602106",1,17.22222222,17.22222222,safe
+01-08-2018 15:49,62,"Kanchipuram - Chennai Rd,Nandimedu,TamilNadu,India,602106",51,17.22222222,878.3333333,unsafe
+01-08-2018 15:50,62,"NH48,Nandimedu,Kanchipuram,Tamil Nadu,India,602106",1,17.22222222,17.22222222,safe
+01-08-2018 15:51,66,"Kanchipuram - Chennai Rd,TamilNadu,India,602106",31,18.33333333,568.3333333,safe
+01-08-2018 15:53,61,"Kanchipuram - Chennai Rd,Keeranallur,TamilNadu,India,602108",1,16.94444444,16.94444444,safe
+01-08-2018 15:55,61,"AH45,Neervalur,Kanchipuram,Tamil Nadu,India,602108",11,16.94444444,186.3888889,safe
+01-08-2018 15:56,62,"Kanchipuram - Chennai Rd,Chinnaiyan Chatram,Neervalur,TamilNadu,India,631561",41,17.22222222,706.1111111,safe
+01-08-2018 16:00,61,"AH45,Illuppapattu,Kanchipuram,Tamil Nadu,India,631561",221,16.94444444,3744.722222,safe
+01-08-2018 16:02,61,"Kodambakkam - Mumbai Highwayy,Seeyati,TamilNadu,India,631552",11,16.94444444,186.3888889,safe
+01-08-2018 16:27,62,"NH48,Thiruppukuzhi,Kanchipuram,Tamil Nadu,India,631551",11,17.22222222,189.4444444,safe
+01-08-2018 16:31,63,"Kodambakkam - Mumbai Highwayy,TamilNadu,India,631551",351,17.5,6142.5,safe
+01-08-2018 21:21,61,"NH4,Dhamal,TamilNadu,India,631551",11,16.94444444,186.3888889,safe
+01-08-2018 22:00,61,"NH48,Neervalur,Kanchipuram,Tamil Nadu,India,602108",41,16.94444444,694.7222222,safe
+01-08-2018 22:01,63,"NH 48,Jambodai,Kanchipuram,Tamil Nadu,India,602108",1,17.5,17.5,unsafe
+01-08-2018 22:02,62,"Kanchipuram - Chennai Rd,Keeranallur,TamilNadu,India,602108",1,17.22222222,17.22222222,safe
+01-08-2018 22:03,61,"Kanchipuram - Chennai Rd,Keeranallur,TamilNadu,India,602108",1,16.94444444,16.94444444,safe
+01-08-2018 22:04,61,"NH48,Pillai Chattiram,Kanchipuram,Tamil Nadu,India,602108",1,16.94444444,16.94444444,safe
+01-08-2018 22:06,61,"NH48,Nandimedu,Kanchipuram,Tamil Nadu,India,602106",21,16.94444444,355.8333333,safe
+01-08-2018 22:09,61,"Kanchipuram - Chennai Rd,Molasur,TamilNadu,India,602106",11,16.94444444,186.3888889,safe
+01-08-2018 23:43,61,"NH48,Molasur,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+01-08-2018 23:45,61,"AH45,Santhavelur,Kanchipuram,Tamil Nadu,India,602106",1,16.94444444,16.94444444,safe
+01-08-2018 23:47,62,"NH48,Nandimedu,Kanchipuram,Tamil Nadu,India,602106",21,17.22222222,361.6666667,safe
+01-08-2018 23:48,61,"Kanchipuram - Chennai Rd,TamilNadu,India,602106",31,16.94444444,525.2777778,safe
+01-08-2018 23:49,61,"Kanchipuram - Chennai Rd,Pillai Chattiram,TamilNadu,India,602106",1,16.94444444,16.94444444,safe
+01-08-2018 23:49,64,"Kanchipuram - Chennai Rd,Pillai Chattiram,TamilNadu,India,602108",1,17.77777778,17.77777778,unsafe
+01-08-2018 23:51,61,"AH45,Jambodai,Kanchipuram,Tamil Nadu,India,602108",1,16.94444444,16.94444444,safe
+01-08-2018 23:54,61,"NH48,Neervalur,Kanchipuram,Tamil Nadu,India,631561",1,16.94444444,16.94444444,safe
+01-08-2018 23:54,61,"Kanchipuram - Chennai Rd,Chinnaiyan Chatram,Neervalur,TamilNadu,India,631561",1,16.94444444,16.94444444,safe
+01-08-2018 23:55,61,"NH48,Attuputhur,Kanchipuram,Tamil Nadu,India,631561",11,16.94444444,186.3888889,safe
+01-08-2018 23:55,61,"NH 48,Attuputhur,Kanchipuram,Tamil Nadu,India,631561",1,16.94444444,16.94444444,safe

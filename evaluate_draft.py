@@ -6,8 +6,6 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from scipy import stats
 from sklearn.ensemble import IsolationForest
-from tqdm import tqdm
-
 from Dppga_for_call import PipelineOptimizer  
 
 class FeatureExtractor:
@@ -164,180 +162,145 @@ class FeatureExtractor:
             return None
 
 def analyze_datasets(directory='dataset_temp', output_dir='results'):
-    # 创建输出目录（如果不存在）
     os.makedirs(output_dir, exist_ok=True)
-    
-    # 初始化结果收集器
     results = []
     candidates = [['discretize', 'features'], ['features', 'discretize']]
-    model_choices = ["RF", "KNN", "NB"]  # 三种算法
+    candidate_str = [f"{candidates[0][0]}->{candidates[0][1]}", 
+                    f"{candidates[1][0]}->{candidates[1][1]}"]
+    model_choices = ["RF", "KNN", "NB"]
     
-    # 获取所有CSV文件
-    all_files = [f for f in os.listdir(directory) if f.endswith('.csv')]
-    total_datasets = len(all_files)
-    total_tasks = total_datasets * len(model_choices)
-    
-    # 创建进度条（固定在底部）
-    pbar = tqdm(total=total_tasks, desc="Overall Progress", position=0, leave=True, 
-                bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
-    
-    # 遍历数据集目录
     processed_count = 0
-    for filename in all_files:
+    for filename in os.listdir(directory):
+        if not filename.endswith('.csv'):
+            continue
+            
         file_path = os.path.join(directory, filename)
         print(f"\nProcessing dataset: {filename}")
         
-        # 特征提取
         features = FeatureExtractor.extract_features(file_path)
         if not features:
             print(f"⛔ Skipped {filename} due to feature extraction failure")
-            # 更新进度条（对应3个模型任务）
-            for _ in range(len(model_choices)):
-                pbar.update(1)
             continue
             
         print(f"✅ Extracted {len(features)} features for {filename}")
-        
-        # 为每种算法运行管道优化评估
         dataset_results = {'dataset': filename, **features}
         
         for model_name in model_choices:
-            # 更新进度条消息
-            pbar.set_description(f"Dataset {processed_count+1}/{total_datasets} - Model {model_name}")
-            pbar.refresh()  # 立即更新显示
-            
             try:
-                # 为基准评估运行一个实例
-                print(f"🔧 Running baseline evaluation for {model_name}...")
-                optimizer_baseline = PipelineOptimizer(
+                print(f"🔧 Running pipeline optimization for {filename} with {model_name}...")
+                optimizer = PipelineOptimizer(
                     file_path=file_path,
                     target_column='label',
-                    steps_order_candidates=[candidates[0]],  # 使用第一个候选作为任意选择
-                    n_trials=0,  # 只运行基准评估
+                    steps_order_candidates=candidates,
+                    n_trials=30,
                     cv=3,
                     model_choices=[model_name]
                 )
-                optimizer_baseline.optimize()
-                baseline_result = optimizer_baseline.get_results()
+                optimizer.optimize()
+                eval_result = optimizer.get_results()
+                print(f"🏆 Optimization completed for {filename} with {model_name}")
                 
-                # 获取基准分数
-                baseline_score = baseline_result['baseline_performance'].get(model_name, {}).get('accuracy', 0)
-                if not baseline_score:
-                    baseline_score = 0
-                    
-                dataset_results[f'baseline_{model_name}'] = baseline_score
+                # 获取基准性能
+                baseline_score = float(eval_result['baseline_performance'][model_name].strip())
                 
-                # 运行两次优化 - 每个候选顺序运行一次
-                optimized_scores = []
-                for candidate in candidates:
-                    print(f"🔧 Running optimization with candidate {candidate}...")
-                    optimizer = PipelineOptimizer(
-                        file_path=file_path,
-                        target_column='label',
-                        steps_order_candidates=[candidate],
-                        n_trials=15,  # 每个候选15次试验
-                        cv=3,
-                        model_choices=[model_name]
-                    )
-                    optimizer.optimize()
-                    eval_result = optimizer.get_results()
-                    
-                    # 获取优化分数
-                    optimized_score = eval_result['optimization_results']['accuracy'] or 0
-                    if optimized_score == -np.inf:
-                        optimized_score = baseline_score  # 使用基准分数作为回退
-                    optimized_scores.append(optimized_score)
+                # 获取每种步骤顺序的最佳性能
+                step1_acc = eval_result['per_steps_order_best'][candidate_str[0]]['accuracy']
+                step2_acc = eval_result['per_steps_order_best'][candidate_str[1]]['accuracy']
                 
-                # 从结果中提取优化分数
-                candidate1_score = optimized_scores[0]
-                candidate2_score = optimized_scores[1]
+                # 获取全局最佳优化性能
+                optimized_score = eval_result['optimization_results']['accuracy']
+                best_step_order = eval_result['optimization_results']['best_steps_order']
                 
-                # 确定获胜策略
-                if candidate1_score > baseline_score and candidate2_score > baseline_score:
-                    if abs(candidate1_score - candidate2_score) < 0.0001:  # 分数相差很小（几乎相同）
-                        strategy = 'Draw'
-                    elif candidate1_score > candidate2_score:
-                        strategy = 'discretize_first'
-                    else:
-                        strategy = 'features_first'
-                elif candidate1_score > baseline_score:
+                # 确定策略
+                if step1_acc == step2_acc and step1_acc > baseline_score:
+                    strategy = 'Draw'  # 两种顺序效果相同
+                elif step1_acc > step2_acc:
                     strategy = 'discretize_first'
-                elif candidate2_score > baseline_score:
+                elif step1_acc < step2_acc:
                     strategy = 'features_first'
-                else:
-                    # 当['discretize','features'], ['features','discretize'], baseline三者结果相同
-                    strategy = 'baseline'
+                elif step1_acc <= baseline_score and step2_acc <= baseline_score:
+                    strategy = 'baseline'  # 优化结果不如基线
+
                 
-                # 确定要记录的优化分数
-                if strategy == 'discretize_first':
-                    optimized_score = candidate1_score
-                elif strategy == 'features_first':
-                    optimized_score = candidate2_score
-                elif strategy == 'Draw':
-                    optimized_score = max(candidate1_score, candidate2_score)  # 取最高分
-                else:  # baseline
-                    optimized_score = baseline_score
+                improvement = optimized_score - baseline_score
+                print(f"  Baseline: {baseline_score:.4f}, " 
+                      f"Order1 {candidate_str[0]}: {step1_acc:.4f}, "
+                      f"Order2 {candidate_str[1]}: {step2_acc:.4f}, "
+                      f"Optimized: {optimized_score:.4f}, "
+                      f"Strategy: {strategy}")
                 
-                print(f"🏆 Results for {model_name}:")
-                print(f"  Baseline:      {baseline_score:.4f}")
-                print(f"  Candidate 1:    {candidate1_score:.4f} (discretize_first)")
-                print(f"  Candidate 2:    {candidate2_score:.4f} (features_first)")
-                print(f"  Strategy:       {strategy}")
-                
-                # 记录结果
-                dataset_results[f'optimized_{model_name}'] = optimized_score
-                dataset_results[f'strategy_{model_name}'] = strategy
-                dataset_results[f'config_{model_name}'] = f"Candidate 1: {candidate1_score:.4f}, Candidate 2: {candidate2_score:.4f}"  # 简化配置记录
+                # 记录详细结果
+                dataset_results.update({
+                    f'baseline_{model_name}': baseline_score,
+                    f'step1_acc_{model_name}': step1_acc,
+                    f'step2_acc_{model_name}': step2_acc,
+                    f'optimized_{model_name}': optimized_score,
+                    f'improvement_{model_name}': improvement,
+                    f'strategy_{model_name}': strategy,
+                    f'best_step_order_{model_name}': best_step_order
+                })
                 
             except Exception as e:
                 print(f"❌ Evaluation failed for {filename} with {model_name}: {str(e)}")
-                # 添加空结果以便继续处理
-                dataset_results[f'baseline_{model_name}'] = np.nan
-                dataset_results[f'optimized_{model_name}'] = np.nan
-                dataset_results[f'strategy_{model_name}'] = 'Draw'  # 失败视为平局
-                dataset_results[f'config_{model_name}'] = '{}'
-            
-            # 更新进度条（每个模型评估完成后）
-            pbar.update(1)
+                # 添加失败标记
+                dataset_results.update({
+                    f'baseline_{model_name}': np.nan,
+                    f'step1_acc_{model_name}': np.nan,
+                    f'step2_acc_{model_name}': np.nan,
+                    f'optimized_{model_name}': np.nan,
+                    f'improvement_{model_name}': np.nan,
+                    f'strategy_{model_name}': 'failed',
+                    f'best_step_order_{model_name}': 'N/A'
+                })
+                continue
         
         results.append(dataset_results)
         processed_count += 1
         print(f"✔️ Completed {processed_count} datasets")
     
-    pbar.close()
-    print(f"\nTotal datasets processed: {processed_count}/{len(all_files)} csv files")
+    print(f"\nTotal datasets processed: {processed_count}")
     
-    # 转换为DataFrame并处理数据
     if not results:
         print("No valid datasets processed")
         return
     
     df = pd.DataFrame(results)
     
-    # 保存数据集信息到CSV
+    # 保存结果
     dataset_info_path = os.path.join(output_dir, 'dataset_strategy_results.csv')
     df.to_csv(dataset_info_path, index=False)
     print(f"\n💾 Saved dataset information to: {dataset_info_path}")
     
-    # 为PCA准备数据
-    non_feature_cols = ['dataset'] + [col for col in df.columns if any(x in col for x in ['baseline', 'optimized', 'strategy', 'config'])]
+    # 准备PCA数据
+    non_feature_cols = ['dataset'] + [col for col in df.columns if any(x in col for x in ['_acc_', 'baseline', 'optimized', 'improvement', 'strategy', 'config'])]
     features = [col for col in df.columns if col not in non_feature_cols]
     
     if not features:
         print("No features available for PCA")
         return
     
-    X = df[features].fillna(0)
+    # 修复：确保所有特征都是数值类型
+    X = df[features].apply(pd.to_numeric, errors='coerce').fillna(0)
+    
+    # 修复：检查并移除非数值列
+    non_numeric_cols = X.select_dtypes(exclude=[np.number]).columns
+    if not non_numeric_cols.empty:
+        print(f"⚠️ Found non-numeric columns: {list(non_numeric_cols)}. Removing them for PCA.")
+        X = X.drop(columns=non_numeric_cols)
+    
+    # 修复：确保所有值都是标量
+    for col in X.columns:
+        if any(isinstance(x, (list, tuple, dict)) for x in X[col]):
+            print(f"⚠️ Column '{col}' contains non-scalar values. Converting to numeric.")
+            X[col] = pd.to_numeric(X[col], errors='coerce')
     
     # 移除方差为0的列
     nonzero_var_cols = X.columns[X.var() > 0]
     if len(nonzero_var_cols) == 0:
         print("No features with non-zero variance for PCA")
         return
-    
     X = X[nonzero_var_cols]
     
-    # 检查是否有足够的数据点进行标准化
     if X.shape[0] > 1:
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
@@ -346,39 +309,37 @@ def analyze_datasets(directory='dataset_temp', output_dir='results'):
     
     # PCA降维
     n_components = min(2, X_scaled.shape[1], max(1, X_scaled.shape[0]-1))
-    if n_components > 0:
-        pca = PCA(n_components=n_components)
-        coords = pca.fit_transform(X_scaled)
-        
-        # 记录解释方差
-        explained_variance = pca.explained_variance_ratio_
-        
-        df['x'] = coords[:, 0]
-        if n_components > 1:
-            df['y'] = coords[:, 1]
-        else:
-            df['y'] = np.zeros(len(coords))
-    else:
+    if n_components <= 0:
         print("Not enough data points for PCA")
         return
     
-    # 可视化 - 为每种算法创建单独的子图
+    pca = PCA(n_components=n_components)
+    coords = pca.fit_transform(X_scaled)
+    explained_variance = pca.explained_variance_ratio_
+    
+    df['x'] = coords[:, 0]
+    df['y'] = coords[:, 1] if n_components > 1 else np.zeros(len(coords))
+    
+    # 可视化
     fig, axes = plt.subplots(1, 3, figsize=(24, 8))
-    fig.suptitle('Dataset Characteristics vs. Optimal Resampling Strategy by Algorithm', fontsize=20, y=1.05)
+    fig.suptitle('3al_50datasets_fd', 
+                fontsize=20, y=1.05)
     
     color_map = {
-        'baseline': '#FF6B6B',
-        'discretize_first': "#190AEB",  # 蓝色
-        'features_first': "#28EA38",    # 绿色
-        'Draw': '#000000'               # 黑色
+        'baseline': '#FF6B6B',     # 红色 - 基准策略
+        'discretize_first': "#190AEB",  # 蓝色 - discretize_first策略
+        'features_first': "#28EA38",   # 绿色 - features_first策略
+        'Draw': 'black',           # 黑色 - 两种策略效果相同
+        'failed': 'gray'           # 灰色 - 失败情况
     }
     
     for i, model_name in enumerate(model_choices):
         ax = axes[i]
         strategy_col = f'strategy_{model_name}'
         
+        # 为每种策略绘制点
         for strategy, color in color_map.items():
-            mask = df[strategy_col] == strategy
+            mask = (df[strategy_col] == strategy) & (strategy != 'failed')  # 排除失败的点
             if mask.any():
                 ax.scatter(
                     df.loc[mask, 'x'], 
@@ -387,63 +348,90 @@ def analyze_datasets(directory='dataset_temp', output_dir='results'):
                     label=strategy, 
                     alpha=0.8, 
                     edgecolors='w',
-                    s=100
+                    s=120
                 )
         
-        # 添加点标签（数据集名称）
+        # 添加点标签（带改进值）
         for idx, row in df.iterrows():
-            if row[strategy_col] != 'Draw':  # 只标记非平局的点
+            strategy = row[strategy_col]
+            if strategy != 'failed':
+                improvement = row.get(f'improvement_{model_name}', 0)
+                label = f"{row['dataset']}\nΔ={improvement:.3f}" if not np.isnan(improvement) else row['dataset']
+                
                 ax.annotate(
-                    row['dataset'], 
+                    label, 
                     (row['x'], row['y']), 
-                    xytext=(5, 5), 
+                    xytext=(7, 7), 
                     textcoords='offset points',
                     fontsize=9,
                     alpha=0.8,
-                    bbox=dict(boxstyle='round,pad=0.2', fc='yellow', alpha=0.2)
+                    bbox=dict(boxstyle='round,pad=0.3', fc='yellow', alpha=0.3)
                 )
         
         # 设置图表信息
         xlabel = f"PC1 ({explained_variance[0]*100:.1f}%)" if i == 0 else ""
-        if n_components > 1:
-            ylabel = f"PC2 ({explained_variance[1]*100:.1f}%)" if i == 1 else ""
-        else:
-            ylabel = ""
-            
+        ylabel = f"PC2 ({explained_variance[1]*100:.1f}%)" if i == 1 else ""
         ax.set_xlabel(xlabel, fontsize=12)
         ax.set_ylabel(ylabel, fontsize=12)
         ax.set_title(f'{model_name} Algorithm', fontsize=16, pad=12)
-        ax.legend(title='Optimal Strategy', title_fontsize='13', loc='upper right')
+        ax.legend(title='Optimal Strategy', title_fontsize='13', loc='best')
         ax.grid(alpha=0.3)
         ax.tick_params(labelsize=10)
     
-    # 保存可视化图像
+    # 保存和显示
     visualization_path = os.path.join(output_dir, 'dataset_strategy_visualization.png')
     plt.tight_layout()
     plt.savefig(visualization_path, dpi=300, bbox_inches='tight')
     print(f"🖼️ Saved visualization to: {visualization_path}")
-    
-    # 显示图表
     plt.show()
     
-    # 返回数据框以便进一步分析
+    # 策略分析报告
+    strategy_report = []
+    for model_name in model_choices:
+        if f'strategy_{model_name}' in df.columns:
+            model_df = df[df[f'strategy_{model_name}'] != 'failed'].copy()
+            
+            if not model_df.empty:
+                # 统计策略分布
+                strategy_counts = model_df[f'strategy_{model_name}'].value_counts().to_dict()
+                
+                # 计算平均改进
+                avg_improvement = model_df[f'improvement_{model_name}'].mean()
+                
+                # 准备数据行
+                report_row = {
+                    'algorithm': model_name,
+                    'datasets_evaluated': len(model_df),
+                    'baseline_wins': strategy_counts.get('baseline', 0),
+                    'discretize_first_wins': strategy_counts.get('discretize_first', 0),
+                    'features_first_wins': strategy_counts.get('features_first', 0),
+                    'draws': strategy_counts.get('Draw', 0),
+                    'avg_improvement': avg_improvement,
+                    'step1_better_count': (model_df[f'step1_acc_{model_name}'] > model_df[f'step2_acc_{model_name}']).sum(),
+                    'step2_better_count': (model_df[f'step2_acc_{model_name}'] > model_df[f'step1_acc_{model_name}']).sum(),
+                    'equal_performance': (model_df[f'step1_acc_{model_name}'] == model_df[f'step2_acc_{model_name}']).sum()
+                }
+                strategy_report.append(report_row)
+    
+    if strategy_report:
+        report_df = pd.DataFrame(strategy_report)
+        report_path = os.path.join(output_dir, 'strategy_analysis_report.csv')
+        report_df.to_csv(report_path, index=False)
+        print(f"\n📊 Saved strategy analysis report to: {report_path}")
+        
+        # 打印简要报告
+        print("\n=== Strategy Analysis Summary ===")
+        print(report_df)
+    
     return df
 
 if __name__ == "__main__":
     results_df = analyze_datasets(
-        directory='dataset_test_min',
-        output_dir='analysis_results_3al_rd'
+        directory='datasets/dataset_std_dr_demo50',
+        output_dir='analysis_results/3al_fd_50'
     )
     
     if results_df is not None:
         print("\nAnalysis completed successfully!")
-        
-        # 打印简要结果
-        print("\n=== Strategy Distribution by Algorithm ===")
-        for model_name in ["RF", "KNN", "NB"]:
-            strategy_col = f'strategy_{model_name}'
-            if strategy_col in results_df.columns:
-                print(f"\n{model_name} Strategy Distribution:")
-                print(results_df[strategy_col].value_counts())
     else:
         print("\nNo valid results were generated")

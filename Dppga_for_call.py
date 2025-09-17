@@ -317,6 +317,7 @@ class PipelineOptimizer:
         self.X, self.y = self._load_data()
         self.baseline_scores = {}
         self.best_overall = None
+        self.per_steps_order_best = {}
         
     def _load_data(self):
         """加载并预处理数据"""
@@ -383,13 +384,24 @@ class PipelineOptimizer:
             'model_type': None
         }
         
+        # 初始化每个步骤顺序的存储
+        for steps_order in self.steps_order_candidates:
+            key = tuple(steps_order)  # 使用元组作为键，因为列表不可哈希
+            self.per_steps_order_best[key] = {
+                'accuracy': -np.inf,
+                'model_type': None,
+                'config': None
+            }
+        
         for model_name in self.model_choices:
             if model_name not in self.model_config:
                 print(f"⚠️ 未知模型类型: {model_name}, 跳过")
                 continue
                 
-            for i, steps_order in enumerate(self.steps_order_candidates, 1):
-                print(f"\n{'='*40}\n优化管道配置 {i} 使用模型 {model_name}: {steps_order}\n{'='*40}")
+            for steps_order in self.steps_order_candidates:
+                key = tuple(steps_order)
+                
+                print(f"\n{'='*40}\n优化步骤顺序: {'->'.join(steps_order)} | 使用模型: {model_name}\n{'='*40}")
                 
                 optimizer = BayesianPipelineOptimizer(
                     steps_order=steps_order,
@@ -400,11 +412,20 @@ class PipelineOptimizer:
                 
                 _, best_score = optimizer.optimize(self.X, self.y)
                 
+                # 更新全局最佳结果
                 if best_score > self.best_overall['accuracy']:
                     self.best_overall['accuracy'] = best_score
                     self.best_overall['config'] = optimizer.format_final_result()
                     self.best_overall['steps_order'] = steps_order
                     self.best_overall['model_type'] = model_name
+                
+                # 更新当前步骤顺序的最佳结果
+                if best_score > self.per_steps_order_best[key]['accuracy']:
+                    self.per_steps_order_best[key]['accuracy'] = best_score
+                    self.per_steps_order_best[key]['model_type'] = model_name
+                    self.per_steps_order_best[key]['config'] = optimizer.format_final_result()
+
+
     
     def get_results(self):
         """获取优化结果"""
@@ -414,7 +435,16 @@ class PipelineOptimizer:
         # 创建基准分数的易读格式
         baseline_summary = {}
         for model_name, scores in self.baseline_scores.items():
-            baseline_summary[model_name] = f"{scores['mean_accuracy']:.4f} "
+            baseline_summary[model_name] = f"{scores['mean_accuracy']} "
+
+        per_steps_best = {}
+        for steps, data in self.per_steps_order_best.items():
+            steps_str = "->".join(steps)
+            per_steps_best[steps_str] = {
+                "accuracy": data['accuracy'],
+                "model_type": data['model_type'],
+                "configuration": data['config']
+            }
         
         return {
             "dataset_info": {
@@ -430,5 +460,6 @@ class PipelineOptimizer:
                 "model_type": self.best_overall['model_type'],
                 "best_steps_order": self.best_overall['steps_order'],
                 "configuration": self.best_overall['config']
-            }
+            },
+            "per_steps_order_best": per_steps_best  # 每个步骤顺序的最佳结果
         }

@@ -1,0 +1,69 @@
+Couple,Season,Location,Name,Age,Gender,Occupation,Decision,Status,DrPepperSchwartz,DrLoganLevkoff,DrJosephCilona,ChaplainGregEpstein,PastorCalvinRoberson,RachelDeAlto,DrJessicaGriffin,DrVivianaColes
+1,1,New York City and Northern New Jersey,Jamie Otis-Hehner,27,F,Nurse,Yes,Married,1,1,1,1,0,0,0,0
+1,1,New York City and Northern New Jersey,Doug Hehner,31,M,Software salesman,Yes,Married,1,1,1,1,0,0,0,0
+2,1,New York City and Northern New Jersey,Cortney Hendrix,26,F,Make-up artist,Yes,Divorced,1,1,1,1,0,0,0,0
+2,1,New York City and Northern New Jersey,Jason Carrion,27,M,Fireman,Yes,Divorced,1,1,1,1,0,0,0,0
+3,1,New York City and Northern New Jersey,Monet Bell,33,F,Product development manager,No,Divorced,1,1,1,1,0,0,0,0
+3,1,New York City and Northern New Jersey,Vaughn Copeland,30,M,Field service technician,No,Divorced,1,1,1,1,0,0,0,0
+4,2,New York City and Northern New Jersey,Jaclyn Methuen,30,F,Vodka saleswoman,Yes,Divorced,1,1,1,1,0,0,0,0
+4,2,New York City and Northern New Jersey,Ryan Ranellone,28,M,Real estate agent,Yes,Divorced,1,1,1,1,0,0,0,0
+5,2,New York City and Northern New Jersey,Davina Kullar (now Davis),34,F,Pharmaceutical saleswoman,No,Divorced,1,1,1,1,0,0,0,0
+5,2,New York City and Northern New Jersey,Sean Varricchio,35,M,Trauma nurse,No,Divorced,1,1,1,1,0,0,0,0
+6,2,New York City and Northern New Jersey,Jessica Castro,30,F,Receptionist,Yes,Divorced,1,1,1,1,0,0,0,0
+6,2,New York City and Northern New Jersey,Ryan DeNino/Oehl,29,M,Businessman,Yes,Divorced,1,1,1,1,0,0,0,0
+7,3,"Atlanta, Georgia",Vanessa Nelson,26,F,Event manager,Yes,Divorced,1,1,1,1,0,0,0,0
+7,3,"Atlanta, Georgia",Tres Russell,27,M,Luxury car salesman,Yes,Divorced,1,1,1,1,0,0,0,0
+8,3,"Atlanta, Georgia",Ashley Doherty,30,F,Nursing student,No,Divorced,1,1,1,1,0,0,0,0
+8,3,"Atlanta, Georgia",David Norton,29,M,Software account executive,Yes,Divorced,1,1,1,1,0,0,0,0
+9,3,"Atlanta, Georgia",Samantha Role,30,F,Bank manager,Yes,Divorced,1,1,1,1,0,0,0,0
+9,3,"Atlanta, Georgia",Neil Bowlus,31,M,Compliance specialist,Yes,Divorced,1,1,1,1,0,0,0,0
+10,4,South Florida,Sonia Granados,33,F,Social worker,Yes,Divorced,1,0,0,0,1,1,0,0
+10,4,South Florida,Nick Pendergrast,32,M,Vacation rental manager,Yes,Divorced,1,0,0,0,1,1,0,0
+11,4,South Florida,Heather Seidel,32,F,Flight attendant,No,Divorced,1,0,0,0,1,1,0,0
+11,4,South Florida,Derek Schwartz,35,M,Account executive,No,Divorced,1,0,0,0,1,1,0,0
+12,4,South Florida,Lillian Vilchez,24,F,Realtor,Yes,Divorced,1,0,0,0,1,1,0,0
+12,4,South Florida,Tom Wilson,29,M,Boat interior designer,Yes,Divorced,1,0,0,0,1,1,0,0
+13,5,"Chicago, Illinois",Danielle DeGroot,30,F,Dietician,Yes,Divorced,1,0,0,0,1,1,0,0
+13,5,"Chicago, Illinois",Cody Knapek,26,M,Trainer / gym owner,Yes,Divorced,1,0,0,0,1,1,0,0
+14,5,"Chicago, Illinois",Sheila Downs,31,F,School district facility director,Yes,Divorced,1,0,0,0,1,1,0,0
+14,5,"Chicago, Illinois",Nate Duhon,26,M,Branch manager of a car rental company,Yes,Divorced,1,0,0,0,1,1,0,0
+15,5,"Chicago, Illinois",Ashley Petta,30,F,Manager of family-owned bar & grill,Yes,Married,1,0,0,0,1,1,0,0
+15,5,"Chicago, Illinois",Anthony D'Amico,33,M,Sale account executive,Yes,Married,1,0,0,0,1,1,0,0
+16,6,"Boston, Massachusetts",Shawniece Jackson,29,F,Cosmetologist,Yes,Married,1,0,0,0,1,0,1,0
+16,6,"Boston, Massachusetts",Jephte Pierre,26,M,2nd grade school teacher,Yes,Married,1,0,0,0,1,0,1,0
+17,6,"Boston, Massachusetts",Molly Duff,25,F,Commercial insurance adjuster,No,Divorced,1,0,0,0,1,0,1,0
+17,6,"Boston, Massachusetts",Jonathan Francetic,28,M,Financial associate,No,Divorced,1,0,0,0,1,0,1,0
+18,6,"Boston, Massachusetts",Jaclyn Schwartzberg,29,F,Technical sales representative,Yes,Divorced,1,0,0,0,1,0,1,0
+18,6,"Boston, Massachusetts",Ryan Buckley,29,M,Firefighter,Yes,Divorced,1,0,0,0,1,0,1,0
+19,7,"Dallas, Texas",Mia Bally,29,F,International recruiter of an airline,Yes,Divorced,1,0,0,0,1,0,1,0
+19,7,"Dallas, Texas",Tristan Thompson,29,M,Tutoring club owner,Yes,Divorced,1,0,0,0,1,0,1,0
+20,7,"Dallas, Texas",Danielle Bergman-Dodd,30,F,Software saleswoman,Yes,Married,1,0,0,0,1,0,1,0
+20,7,"Dallas, Texas",Bobby Dodd,27,M,Construction project manager,Yes,Married,1,0,0,0,1,0,1,0
+21,7,"Dallas, Texas",Amber Martorana,36,F,Senior title analyst,Yes,Divorced,1,0,0,0,1,0,1,0
+21,7,"Dallas, Texas",Dave Flaherty,37,M,High yield bond trader,Yes,Divorced,1,0,0,0,1,0,1,0
+22,8,"Philadelphia, Pennsylvania",Stephanie Sersen,35,F,Financial consultant,Yes,Married,1,0,0,0,1,0,1,0
+22,8,"Philadelphia, Pennsylvania",AJ Vollmoeller,37,M,President & CEO of a staffing & recruiting company,Yes,Married,1,0,0,0,1,0,1,0
+23,8,"Philadelphia, Pennsylvania",Jasmine McGriff,30,F,Assistant director,Yes,Divorced,1,0,0,0,1,0,1,0
+23,8,"Philadelphia, Pennsylvania",Will Guess,37,M,Financial analyst,No,Divorced,1,0,0,0,1,0,1,0
+24,8,"Philadelphia, Pennsylvania",Kate Sisk,28,F,Hotel marketing specialist,No,Divorced,1,0,0,0,1,0,1,0
+24,8,"Philadelphia, Pennsylvania",Luke Cuccurullo,31,M,Civil and environmental engineer,No,Divorced,1,0,0,0,1,0,1,0
+25,8,"Philadelphia, Pennsylvania",Kristine Killingsworth,29,F,Residential real estate agent,Yes,Married,1,0,0,0,1,0,1,0
+25,8,"Philadelphia, Pennsylvania",Keith Dewar,29,M,Kidney dialysis patient care technician,Yes,Married,1,0,0,0,1,0,1,0
+26,9,"Charlotte, North Carolina",Iris Caldwell,27,F,Non-Profit Program Coordinator,Yes,Divorced,1,0,0,0,1,0,0,1
+26,9,"Charlotte, North Carolina",Keith Manley,27,M,Mentor/Coach,No,Divorced,1,0,0,0,1,0,0,1
+27,9,"Charlotte, North Carolina",Elizabeth Bice,29,F,Account Executive,Yes,Married,1,0,0,0,1,0,0,1
+27,9,"Charlotte, North Carolina",Jamie Thompson,35,M,Financial Technician,Yes,Married,1,0,0,0,1,0,0,1
+28,9,"Charlotte, North Carolina",Deonna McNeill,30,F,Operations Manager,Yes,Married,1,0,0,0,1,0,0,1
+28,9,"Charlotte, North Carolina",Gregory Okotie,32,M,Math Learning Center Owner,Yes,Married,1,0,0,0,1,0,0,1
+29,9,"Charlotte, North Carolina",Amber Bowles,27,F,Middle School Teacher,No,Divorced,1,0,0,0,1,0,0,1
+29,9,"Charlotte, North Carolina",Matthew Gwynne,31,M,Ex Professional Basketball Player,No,Divorced,1,0,0,0,1,0,0,1
+30,10,Washington D.C.,Katie Conrad,25,F,Mental Health Professional,Yes,Divorced,1,0,0,0,1,0,0,1
+30,10,Washington D.C.,Derek Sherman,26,M,Cyber Security Engineer,Yes,Divorced,1,0,0,0,1,0,0,1
+31,10,Washington D.C.,Jessica Studer,31,F,Nurse Manager,Yes,Married,1,0,0,0,1,0,0,1
+31,10,Washington D.C.,Austin Hurd,31,M,Network Technician,Yes,Married,1,0,0,0,1,0,0,1
+32,10,Washington D.C.,Taylor Dunklin,27,F,Research Scientist,No,Divorced,1,0,0,0,1,0,0,1
+32,10,Washington D.C.,Brandon Reid,34,M,Sales Manager,No,Divorced,1,0,0,0,1,0,0,1
+33,10,Washington D.C.,Meka Jones,25,F,Category Analyst,No,Divorced,1,0,0,0,1,0,0,1
+33,10,Washington D.C.,Michael Watson,31,M,Education Director,Yes,Divorced,1,0,0,0,1,0,0,1
+34,10,Washington D.C.,Mindy Shiben,34,F,Figure Skating Coach,No,Divorced,1,0,0,0,1,0,0,1
+34,10,Washington D.C.,Zach Justice,32,M,Fitness Professional,No,Divorced,1,0,0,0,1,0,0,1
