@@ -1,0 +1,19 @@
+
+--- LOG at 2025-10-31T09:54:34.392203 ---
+STDOUT:
+
+--- Optimize: Model=KNN | Steps=impute->normalize->encode->features->rebalance ---
+
+⚠️ Trial 0 failed: 'RF'
+
+⚠️ Trial 1 failed: 'RF'
+
+⚠️ Trial 2 failed: 'RF'
+
+STDERR:
+/home/hit_lt/Dppga/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hit_lt/Dppga/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/3 [00:00<?, ?it/s]Optimizing Pipeline:  33%|###3      | 1/3 [00:00<00:00, 2049.00it/s, Best Acc=0.0000]Optimizing Pipeline:  67%|######6   | 2/3 [00:00<00:00, 1981.25it/s, Best Acc=0.0000]Optimizing Pipeline: 100%|##########| 3/3 [00:00<00:00, 1929.01it/s, Best Acc=0.0000]Optimizing Pipeline: 100%|##########| 3/3 [00:00<00:00, 1819.39it/s, Best Acc=0.0000]
+

@@ -1,0 +1,19 @@
+
+--- LOG at 2025-10-31T09:54:35.367696 ---
+STDOUT:
+
+--- Optimize: Model=LR | Steps=impute->encode->normalize->features->rebalance ---
+
+⚠️ Trial 0 failed: 'RF'
+
+⚠️ Trial 1 failed: 'RF'
+
+⚠️ Trial 2 failed: 'RF'
+
+STDERR:
+/home/hit_lt/Dppga/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hit_lt/Dppga/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/3 [00:00<?, ?it/s]Optimizing Pipeline:  33%|###3      | 1/3 [00:00<00:00, 1979.38it/s, Best Acc=0.0000]Optimizing Pipeline:  67%|######6   | 2/3 [00:00<00:00, 2074.33it/s, Best Acc=0.0000]Optimizing Pipeline: 100%|##########| 3/3 [00:00<00:00, 2021.68it/s, Best Acc=0.0000]Optimizing Pipeline: 100%|##########| 3/3 [00:00<00:00, 1906.79it/s, Best Acc=0.0000]
+

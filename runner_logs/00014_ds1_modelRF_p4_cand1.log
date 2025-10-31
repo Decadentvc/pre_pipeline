@@ -1,0 +1,25 @@
+
+--- LOG at 2025-10-31T09:55:34.775594 ---
+STDOUT:
+
+--- Optimize: Model=RF | Steps=impute->encode->normalize->features->rebalance ---
+
+STDERR:
+/home/hit_lt/Dppga/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hit_lt/Dppga/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/3 [00:00<?, ?it/s]/home/hit_lt/Dppga/lib/python3.8/site-packages/sklearn/feature_selection/_univariate_selection.py:113: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/hit_lt/Dppga/lib/python3.8/site-packages/sklearn/feature_selection/_univariate_selection.py:113: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/hit_lt/Dppga/lib/python3.8/site-packages/sklearn/feature_selection/_univariate_selection.py:113: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+Optimizing Pipeline:  33%|###3      | 1/3 [00:04<00:09,  4.95s/it]Optimizing Pipeline:  33%|###3      | 1/3 [00:04<00:09,  4.95s/it, Best Acc=0.2270]Optimizing Pipeline:  67%|######6   | 2/3 [00:07<00:03,  3.45s/it, Best Acc=0.2270]Optimizing Pipeline:  67%|######6   | 2/3 [00:07<00:03,  3.45s/it, Best Acc=0.2270]/home/hit_lt/Dppga/lib/python3.8/site-packages/sklearn/feature_selection/_univariate_selection.py:113: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/hit_lt/Dppga/lib/python3.8/site-packages/sklearn/feature_selection/_univariate_selection.py:113: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+/home/hit_lt/Dppga/lib/python3.8/site-packages/sklearn/feature_selection/_univariate_selection.py:113: RuntimeWarning: invalid value encountered in divide
+  f = msb / msw
+Optimizing Pipeline: 100%|##########| 3/3 [00:08<00:00,  2.54s/it, Best Acc=0.2270]Optimizing Pipeline: 100%|##########| 3/3 [00:08<00:00,  2.54s/it, Best Acc=0.4646]Optimizing Pipeline: 100%|##########| 3/3 [00:08<00:00,  2.93s/it, Best Acc=0.4646]
+
