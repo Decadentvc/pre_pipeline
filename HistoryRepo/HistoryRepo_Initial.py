@@ -15,7 +15,7 @@ from pathlib import Path
 
 # 确保可以导入上一级目录的 prototype_evaluate
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from prototype_evaluate import ModelManager, EnhancedPipelineRunner
+from prototype_evaluate_duration_limit import ModelManager, EnhancedPipelineRunner
 
 # ----------------- 可配置项 -----------------
 DATASETS_DIR = "../datasets/dataset_csv_std_duplicate_removal"
@@ -24,16 +24,17 @@ LOGS_DIR = "runner_logs"
 TARGET_COLUMN = "label"
 N_TRIALS = 10
 CV = 3
-TRIAL_TIMEOUT = 120
+TRIAL_TIMEOUT = 2
+
 STEPS_ORDER_CANDIDATES = [
-    ['impute', 'encode', 'normalize', 'features', 'discretize', 'rebalance'],
-    ['impute', 'encode', 'normalize', 'features', 'rebalance', 'discretize'],
-    ['impute', 'encode', 'normalize', 'rebalance', 'discretize', 'features'],
-    ['impute', 'encode', 'normalize', 'rebalance', 'features', 'discretize'],
-    ['impute', 'encode', 'discretize', 'features', 'normalize', 'rebalance'],
-    ['impute', 'encode', 'discretize', 'rebalance', 'features', 'normalize'],
-    ['impute', 'encode', 'features', 'normalize', 'rebalance', 'discretize'],
-    ['impute', 'encode', 'rebalance', 'discretize', 'features', 'normalize'],
+    (1, ['impute', 'encode', 'normalize', 'features', 'discretize', 'rebalance']),
+    (2, ['impute', 'encode', 'normalize', 'features', 'rebalance', 'discretize']),
+    (3, ['impute', 'encode', 'normalize', 'rebalance', 'discretize', 'features']),
+    (4, ['impute', 'encode', 'normalize', 'rebalance', 'features', 'discretize']),
+    (5, ['impute', 'encode', 'discretize', 'features', 'normalize', 'rebalance']),
+    (6, ['impute', 'encode', 'discretize', 'rebalance', 'features', 'normalize']),
+    (7, ['impute', 'encode', 'features', 'normalize', 'rebalance', 'discretize']),
+    (8, ['impute', 'encode', 'rebalance', 'discretize', 'features', 'normalize']),
 ]
 # ------------------------------------------------------
 
@@ -43,7 +44,7 @@ def get_param_sets(model_type: str):
         return [
             {'penalty': 'l1', 'C': 0.01, 'solver': 'liblinear', 'multi_class': 'ovr'},
             {'penalty': 'l2', 'C': 0.1, 'solver': 'lbfgs', 'multi_class': 'multinomial'},
-            {'penalty': 'elasticnet', 'C': 1.0, 'solver': 'saga', 'multi_class': 'ovr','l1_ratio': 0.5, 'max_iter': 500},
+            {'penalty': 'elasticnet', 'C': 1.0, 'solver': 'saga', 'multi_class': 'ovr', 'l1_ratio': 0.5, 'max_iter': 500},
             {'penalty': None, 'C': 10.0, 'solver': 'newton-cg', 'multi_class': 'multinomial'},
             {'penalty': 'l2', 'C': 100.0, 'solver': 'sag', 'multi_class': 'ovr'}
         ]
@@ -124,16 +125,13 @@ def run_runner_silent(runner, save_logs=True, log_path=None):
     err = stderr_buf.getvalue()
 
     if save_logs and log_path:
-        try:
-            Path(log_path).parent.mkdir(parents=True, exist_ok=True)
-            with open(log_path, "a", encoding="utf-8") as lf:
-                lf.write(f"\n--- LOG at {datetime.utcnow().isoformat()} ---\n")
-                if out:
-                    lf.write("STDOUT:\n" + out + "\n")
-                if err:
-                    lf.write("STDERR:\n" + err + "\n")
-        except Exception:
-            pass
+        Path(log_path).parent.mkdir(parents=True, exist_ok=True)
+        with open(log_path, "a", encoding="utf-8") as lf:
+            lf.write(f"\n--- LOG at {datetime.utcnow().isoformat()} ---\n")
+            if out:
+                lf.write("STDOUT:\n" + out + "\n")
+            if err:
+                lf.write("STDERR:\n" + err + "\n")
 
     if exc:
         exc.captured_stdout = out
@@ -145,21 +143,18 @@ def run_runner_silent(runner, save_logs=True, log_path=None):
 # ---------- 主流程 ----------
 def main():
     models = ["KNN", "LR", "RF", "SVM", "DT", "GBDT"]
-
     dataset_paths = sorted(glob.glob(os.path.join(DATASETS_DIR, "*.csv")))
     if not dataset_paths:
         print(f"ERROR: no datasets found under {DATASETS_DIR}. 请检查路径。")
         return
 
     Path(LOGS_DIR).mkdir(parents=True, exist_ok=True)
-
     n_datasets = len(dataset_paths)
     n_models = len(models)
     n_param_sets = 5
     n_candidates = len(STEPS_ORDER_CANDIDATES)
     total_tasks = n_datasets * n_models * n_param_sets
 
-    # 断点续跑
     completed = set()
     if os.path.exists(OUTPUT_CSV):
         with open(OUTPUT_CSV, "r", encoding="utf-8") as f:
@@ -175,7 +170,8 @@ def main():
             "index","timestamp_utc","dataset_id","dataset_name",
             "model_type","param_set_id","param_json",
             "candidate_accuracies_json","candidate_ranking_json",
-            "best_accuracy","best_candidate","status","error_message"
+            "best_accuracy","best_candidate","best_candidate_id","accuracy_ranking",
+            "status","error_message"
         ])
         csv_file.flush()
 
@@ -192,109 +188,79 @@ def main():
                     task_counter += 1
 
                     if (ds_name, model_type, p_idx) in completed:
-                        elapsed = int(time.time() - start_time)
-                        elapsed_s = time.strftime("%H:%M:%S", time.gmtime(elapsed))
-                        term_w = shutil.get_terminal_size((120, 20)).columns
-                        base = (f"Progress {task_counter}/{total_tasks} | ds {ds_idx}/{n_datasets} ({ds_name}) "
-                                f"| model {model_type} | param {p_idx}/{n_param_sets} | elapsed {elapsed_s} | SKIPPED")
-                        print("\r" + base.ljust(term_w), end="", flush=True)
                         continue
 
-                    elapsed = int(time.time() - start_time)
-                    elapsed_s = time.strftime("%H:%M:%S", time.gmtime(elapsed))
-                    term_w = shutil.get_terminal_size((120, 20)).columns
-                    base = (f"Progress {task_counter}/{total_tasks} | ds {ds_idx}/{n_datasets} ({ds_name}) "
-                            f"| model {model_type} | param {p_idx}/{n_param_sets} | elapsed {elapsed_s}")
-                    print("\r" + base.ljust(term_w), end="", flush=True)
-
-                    # ---- 初始化每轮变量 ----
                     candidate_accs = {}
                     ranking = []
                     best_candidate = None
                     best_acc = None
+                    best_cand_id = None
                     status = "SUCCESS"
                     error_msg = ""
 
                     try:
-                        # 重置模型管理器状态
                         for k in mm.available_keys():
                             mm.disable(k)
                         mm.enable(model_type)
+                        mm.set_model_params(model_type, **params)
 
-                        try:
-                            mm.set_model_params(model_type, **params)
-                        except TypeError:
-                            mm.set_model_params(model_type, params)
-
-                        # 遍历 candidates
-                        for cand_idx, cand in enumerate(STEPS_ORDER_CANDIDATES, start=1):
-                            cand_progress = (f"Progress {task_counter}/{total_tasks} | ds {ds_idx}/{n_datasets} ({ds_name}) "
-                                             f"| model {model_type} | param {p_idx}/{n_param_sets} | candidate {cand_idx}/{n_candidates}")
-                            print("\r" + cand_progress.ljust(term_w), end="", flush=True)
-
+                        for cand_id, cand in STEPS_ORDER_CANDIDATES:
                             runner = EnhancedPipelineRunner(
                                 file_path=ds_path, target_column=TARGET_COLUMN,
                                 steps_order_candidates=[cand], model_manager=mm,
                                 n_trials=N_TRIALS, cv=CV, trial_timeout=TRIAL_TIMEOUT
                             )
-                            log_fname = f"{task_counter:05d}_ds{ds_idx}_model{model_type}_p{p_idx}_cand{cand_idx}.log"
+                            log_fname = f"{task_counter:05d}_ds{ds_idx}_model{model_type}_p{p_idx}_cand{cand_id}.log"
                             log_path = os.path.join(LOGS_DIR, log_fname)
                             try:
-                                results, captured_out, captured_err = run_runner_silent(runner, True, log_path)
+                                results, _, _ = run_runner_silent(runner, True, log_path)
                                 acc = extract_accuracy_from_results(results, model_type)
-                                if acc is None and hasattr(runner, "last_result"):
-                                    acc = extract_accuracy_from_results(runner.last_result, model_type)
-                            except Exception as e:
-                                status = "ERROR"
-                                captured_out = getattr(e, 'captured_stdout', '')
-                                captured_err = getattr(e, 'captured_stderr', '')
-                                short_out = captured_out[:2000] if captured_out else ''
-                                short_err = captured_err[:2000] if captured_err else ''
-                                error_msg = f"{type(e).__name__}: {str(e)}\n{short_out}\n{short_err}"
+                            except Exception:
                                 acc = None
+                            candidate_accs[str(cand_id)] = acc
 
-                            candidate_accs[json.dumps(cand, ensure_ascii=False)] = float(acc) if acc is not None else None
+                        valid = [(cid, a) for cid, a in candidate_accs.items() if a is not None]
+                        valid.sort(key=lambda x: -x[1])
+                        if valid:
+                            best_cand_id, best_acc = valid[0]
+                            best_candidate = [c for cid, c in STEPS_ORDER_CANDIDATES if str(cid) == str(best_cand_id)][0]
 
-                            # 排名与最佳值
-                            sortable = [(cand, a) for cand, a in candidate_accs.items() if a is not None]
-                            sortable.sort(key=lambda x: (-x[1], x[0]))
-                            ranking = [cand for cand, _ in sortable]
-                            if sortable:
-                                best_candidate = ranking[0]
-                                best_acc = sortable[0][1]
+                        # 计算准确率排名
+                        acc_dict = {}
+                        for cid, acc in candidate_accs.items():
+                            acc_dict.setdefault(acc, []).append(cid)
+                        if None in acc_dict:
+                            del acc_dict[None]
+                        sorted_acc = sorted(acc_dict.items(), key=lambda x: -x[0])
+                        ranking_parts = []
+                        for acc, cids in sorted_acc:
+                            if len(cids) == 1:
+                                ranking_parts.append(str(cids[0]))
+                            else:
+                                ranking_parts.append("=".join(sorted(map(str, cids))))
+                        ranking_str = ">".join(ranking_parts)
 
-                            summary = f" done_cands={len(candidate_accs)}/{n_candidates}"
-                            if best_acc is not None:
-                                summary += f" | best_sofar={best_acc:.4f}"
-                            print("\r" + (cand_progress + summary).ljust(term_w), end="", flush=True)
-
-                    except KeyboardInterrupt:
-                        status = "INTERRUPTED"
-                        error_msg = "KeyboardInterrupt by user"
-                        print("\nKeyboardInterrupt received, flushing results.")
-                        raise
                     except Exception as e:
                         status = "ERROR"
-                        error_msg = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
+                        error_msg = f"{type(e).__name__}: {str(e)}"
 
-                    # 写入 CSV
                     csv_writer.writerow([
                         task_counter, datetime.utcnow().isoformat(), ds_idx, ds_name,
                         model_type, p_idx, json.dumps(params, ensure_ascii=False),
                         json.dumps(candidate_accs, ensure_ascii=False),
                         json.dumps(ranking, ensure_ascii=False),
                         best_acc if best_acc is not None else "",
-                        best_candidate if best_candidate is not None else "",
-                        status, error_msg
+                        json.dumps(best_candidate, ensure_ascii=False) if best_candidate else "",
+                        best_cand_id if best_cand_id is not None else "",
+                        ranking_str, status, error_msg
                     ])
                     csv_file.flush()
 
         print("\nAll tasks completed. Results written to:", OUTPUT_CSV)
 
-    except KeyboardInterrupt:
-        print("\nRun interrupted by user. Partial results saved to:", OUTPUT_CSV)
     finally:
         csv_file.close()
+
 
 if __name__ == "__main__":
     main()
