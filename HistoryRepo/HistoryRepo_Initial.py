@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import os
 import glob
 import json
@@ -10,21 +9,26 @@ import io
 import sys
 import shutil
 import contextlib
+import threading
+import psutil  # ✅ 新增用于安全终止卡死进程
 from datetime import datetime
 from pathlib import Path
 
-# 确保可以导入上一级目录的 prototype_evaluate
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from prototype_evaluate_duration_limit import ModelManager, EnhancedPipelineRunner
 
+
 # ----------------- 可配置项 -----------------
 DATASETS_DIR = "../datasets/dataset_csv_std_duplicate_removal"
-OUTPUT_CSV = "grid_evaluation_results.csv"
+OUTPUT_CSV = "evaluation_results.csv"
 LOGS_DIR = "runner_logs"
 TARGET_COLUMN = "label"
 N_TRIALS = 10
 CV = 3
-TRIAL_TIMEOUT = 2
+TRIAL_TIMEOUT = 30
+
+# candidate-level timeout 秒数
+CANDIDATE_TIMEOUT = N_TRIALS * TRIAL_TIMEOUT + 10
 
 STEPS_ORDER_CANDIDATES = [
     (1, ['impute', 'encode', 'normalize', 'features', 'discretize', 'rebalance']),
@@ -38,15 +42,24 @@ STEPS_ORDER_CANDIDATES = [
 ]
 # ------------------------------------------------------
 
+
 # ---------- 模型参数集合 ----------
 def get_param_sets(model_type: str):
-    if model_type == "LR":
+    if model_type == "SVM":
         return [
-            {'penalty': 'l1', 'C': 0.01, 'solver': 'liblinear', 'multi_class': 'ovr'},
-            {'penalty': 'l2', 'C': 0.1, 'solver': 'lbfgs', 'multi_class': 'multinomial'},
+            {'C': 0.1, 'kernel': 'linear', 'gamma': 'scale', 'max_iter': 500},
+            {'C': 1.0, 'kernel': 'rbf', 'gamma': 'auto', 'max_iter': 500},
+            {'C': 10.0, 'kernel': 'poly', 'degree': 2, 'gamma': 0.1, 'max_iter': 500},
+            {'C': 0.5, 'kernel': 'sigmoid', 'gamma': 'scale', 'max_iter': 500},
+            {'C': 100.0, 'kernel': 'poly', 'degree': 3, 'gamma': 'auto', 'max_iter': 500}
+        ]
+    elif model_type == "LR":
+        return [
+            {'penalty': 'l1', 'C': 0.01, 'solver': 'liblinear', 'multi_class': 'ovr', 'max_iter': 500},
+            {'penalty': 'l2', 'C': 0.1, 'solver': 'lbfgs', 'multi_class': 'multinomial', 'max_iter': 500},
             {'penalty': 'elasticnet', 'C': 1.0, 'solver': 'saga', 'multi_class': 'ovr', 'l1_ratio': 0.5, 'max_iter': 500},
-            {'penalty': None, 'C': 10.0, 'solver': 'newton-cg', 'multi_class': 'multinomial'},
-            {'penalty': 'l2', 'C': 100.0, 'solver': 'sag', 'multi_class': 'ovr'}
+            {'penalty': None, 'C': 10.0, 'solver': 'newton-cg', 'multi_class': 'multinomial', 'max_iter': 500},
+            {'penalty': 'l2', 'C': 100.0, 'solver': 'sag', 'multi_class': 'ovr', 'max_iter': 500}
         ]
     elif model_type == "RF":
         return [
@@ -55,14 +68,6 @@ def get_param_sets(model_type: str):
             {'n_estimators': 200, 'criterion': 'gini', 'max_depth': None, 'max_features': 0.3},
             {'n_estimators': 150, 'criterion': 'entropy', 'max_depth': 15, 'max_features': 0.5},
             {'n_estimators': 100, 'criterion': 'gini', 'max_depth': 20, 'max_features': None}
-        ]
-    elif model_type == "SVM":
-        return [
-            {'C': 0.1, 'kernel': 'linear', 'gamma': 'scale'},
-            {'C': 1.0, 'kernel': 'rbf', 'gamma': 'auto'},
-            {'C': 10.0, 'kernel': 'poly', 'degree': 2, 'gamma': 0.1},
-            {'C': 0.5, 'kernel': 'sigmoid', 'gamma': 'scale'},
-            {'C': 100.0, 'kernel': 'poly', 'degree': 3, 'gamma': 'auto'}
         ]
     elif model_type == "DT":
         return [
@@ -91,6 +96,7 @@ def get_param_sets(model_type: str):
     else:
         raise ValueError(f"Unknown model type: {model_type}")
 
+
 # ---------- 提取准确率 ----------
 def extract_accuracy_from_results(results, model_key=None):
     try:
@@ -110,6 +116,58 @@ def extract_accuracy_from_results(results, model_key=None):
         pass
     return None
 
+
+# ---------- 安全运行一个 candidate 的评估（带超时） ----------
+def run_candidate_with_timeout(runner, model_type, log_path):
+    """
+    在独立线程中运行 run_runner_silent ，超过 CANDIDATE_TIMEOUT 秒则强制中断
+    """
+    results_container = {}
+    thread_ex = None
+
+    def target():
+        nonlocal results_container, thread_ex
+        try:
+            results, _, _ = run_runner_silent(runner, True, log_path)
+            results_container["res"] = results
+        except Exception as e:
+            thread_ex = e
+
+    t = threading.Thread(target=target, daemon=True)
+    t.start()
+    t.join(timeout=CANDIDATE_TIMEOUT)
+
+    if t.is_alive():
+        # candidate 卡死，强制终止
+        try:
+            # 杀掉所有与当前线程相关的僵尸子进程
+            parent = psutil.Process(os.getpid())
+            for child in parent.children(recursive=True):
+                if child.status() == psutil.STATUS_ZOMBIE:
+                    child.kill()
+        except Exception:
+            pass
+        # 写入日志
+        with open(log_path, "a", encoding="utf-8") as lf:
+            lf.write(f"\n--- CANDIDATE TIMEOUT after {CANDIDATE_TIMEOUT}s ---\n")
+
+        # 尝试取 runner 的 best value
+        best_acc = None
+        try:
+            if hasattr(runner, "study") and runner.study is not None and hasattr(runner.study, "best_value"):
+                best_acc = runner.study.best_value
+        except Exception:
+            pass
+
+        return best_acc, "TIMEOUT", None
+
+    if thread_ex:
+        raise thread_ex
+    results = results_container.get("res", None)
+    acc = extract_accuracy_from_results(results, model_type)
+    return acc, "SUCCESS", results
+
+
 # ---------- 静默运行 ----------
 def run_runner_silent(runner, save_logs=True, log_path=None):
     stdout_buf = io.StringIO()
@@ -123,6 +181,8 @@ def run_runner_silent(runner, save_logs=True, log_path=None):
         exc = e
     out = stdout_buf.getvalue()
     err = stderr_buf.getvalue()
+    stdout_buf.close()
+    stderr_buf.close()
 
     if save_logs and log_path:
         Path(log_path).parent.mkdir(parents=True, exist_ok=True)
@@ -140,12 +200,13 @@ def run_runner_silent(runner, save_logs=True, log_path=None):
 
     return results, out, err
 
+
 # ---------- 主流程 ----------
 def main():
     models = ["KNN", "LR", "RF", "SVM", "DT", "GBDT"]
     dataset_paths = sorted(glob.glob(os.path.join(DATASETS_DIR, "*.csv")))
     if not dataset_paths:
-        print(f"ERROR: no datasets found under {DATASETS_DIR}. 请检查路径。")
+        print(f"ERROR: no datasets found under {DATASETS_DIR}.")
         return
 
     Path(LOGS_DIR).mkdir(parents=True, exist_ok=True)
@@ -160,7 +221,10 @@ def main():
         with open(OUTPUT_CSV, "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                completed.add((row["dataset_name"], row["model_type"], int(row["param_set_id"])))
+                try:
+                    completed.add((row["dataset_name"], row["model_type"], int(row["param_set_id"])))
+                except Exception:
+                    continue
 
     first_run = not os.path.exists(OUTPUT_CSV) or os.path.getsize(OUTPUT_CSV) == 0
     csv_file = open(OUTPUT_CSV, "a", newline="", encoding="utf-8")
@@ -191,6 +255,7 @@ def main():
                         continue
 
                     candidate_accs = {}
+                    ranking_str = ""
                     ranking = []
                     best_candidate = None
                     best_acc = None
@@ -199,10 +264,15 @@ def main():
                     error_msg = ""
 
                     try:
-                        for k in mm.available_keys():
-                            mm.disable(k)
-                        mm.enable(model_type)
-                        mm.set_model_params(model_type, **params)
+                        if hasattr(mm, "available_keys") and hasattr(mm, "disable"):
+                            for k in mm.available_keys():
+                                mm.disable(k)
+                        if hasattr(mm, "enable"):
+                            mm.enable(model_type)
+                        try:
+                            mm.set_model_params(model_type, **params)
+                        except TypeError:
+                            mm.set_model_params(model_type, params)
 
                         for cand_id, cand in STEPS_ORDER_CANDIDATES:
                             runner = EnhancedPipelineRunner(
@@ -212,25 +282,31 @@ def main():
                             )
                             log_fname = f"{task_counter:05d}_ds{ds_idx}_model{model_type}_p{p_idx}_cand{cand_id}.log"
                             log_path = os.path.join(LOGS_DIR, log_fname)
+
                             try:
-                                results, _, _ = run_runner_silent(runner, True, log_path)
-                                acc = extract_accuracy_from_results(results, model_type)
-                            except Exception:
+                                acc, stat, _ = run_candidate_with_timeout(runner, model_type, log_path)
+                                if stat == "TIMEOUT":
+                                    status = "CANDIDATE_TIMEOUT"
+                            except Exception as e:
                                 acc = None
+                                error_msg = f"{type(e).__name__}: {str(e)}"
+
                             candidate_accs[str(cand_id)] = acc
 
+                        # 选最优
                         valid = [(cid, a) for cid, a in candidate_accs.items() if a is not None]
                         valid.sort(key=lambda x: -x[1])
                         if valid:
                             best_cand_id, best_acc = valid[0]
-                            best_candidate = [c for cid, c in STEPS_ORDER_CANDIDATES if str(cid) == str(best_cand_id)][0]
+                            for cid, steps in STEPS_ORDER_CANDIDATES:
+                                if str(cid) == str(best_cand_id):
+                                    best_candidate = steps
+                                    break
 
-                        # 计算准确率排名
                         acc_dict = {}
                         for cid, acc in candidate_accs.items():
-                            acc_dict.setdefault(acc, []).append(cid)
-                        if None in acc_dict:
-                            del acc_dict[None]
+                            if acc is not None:
+                                acc_dict.setdefault(acc, []).append(cid)
                         sorted_acc = sorted(acc_dict.items(), key=lambda x: -x[0])
                         ranking_parts = []
                         for acc, cids in sorted_acc:
@@ -239,10 +315,11 @@ def main():
                             else:
                                 ranking_parts.append("=".join(sorted(map(str, cids))))
                         ranking_str = ">".join(ranking_parts)
+                        ranking = ranking_parts
 
                     except Exception as e:
                         status = "ERROR"
-                        error_msg = f"{type(e).__name__}: {str(e)}"
+                        error_msg = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
 
                     csv_writer.writerow([
                         task_counter, datetime.utcnow().isoformat(), ds_idx, ds_name,
@@ -256,8 +333,7 @@ def main():
                     ])
                     csv_file.flush()
 
-        print("\nAll tasks completed. Results written to:", OUTPUT_CSV)
-
+        print("\nAll tasks completed.")
     finally:
         csv_file.close()
 
