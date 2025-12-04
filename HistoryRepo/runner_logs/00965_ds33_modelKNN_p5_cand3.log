@@ -1,0 +1,17 @@
+
+--- LOG at 2025-11-21T04:07:59.283534 ---
+STDOUT:
+
+--- Optimize: Model=KNN | Steps=impute->encode->normalize->rebalance->discretize->features ---
+
+⚠️ Trial 3 failed inside subprocess: Metric 'chebyshev' not valid for sparse input. Use sorted(sklearn.neighbors.VALID_METRICS_SPARSE['brute']) to get valid options. Metric can also be a callable function.
+
+⏱️ Trial 7 timed out after 30 seconds and was terminated.
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:02<00:18,  2.08s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:02<00:18,  2.08s/it, Best Acc=0.4827]Optimizing Pipeline:  20%|##        | 2/10 [00:03<00:13,  1.70s/it, Best Acc=0.4827]Optimizing Pipeline:  20%|##        | 2/10 [00:03<00:13,  1.70s/it, Best Acc=0.4885]Optimizing Pipeline:  30%|###       | 3/10 [00:06<00:15,  2.23s/it, Best Acc=0.4885]Optimizing Pipeline:  30%|###       | 3/10 [00:06<00:15,  2.23s/it, Best Acc=0.4885]Optimizing Pipeline:  40%|####      | 4/10 [00:07<00:11,  1.97s/it, Best Acc=0.4885]Optimizing Pipeline:  40%|####      | 4/10 [00:07<00:11,  1.97s/it, Best Acc=0.4885]Optimizing Pipeline:  50%|#####     | 5/10 [00:10<00:11,  2.29s/it, Best Acc=0.4885]Optimizing Pipeline:  50%|#####     | 5/10 [00:10<00:11,  2.29s/it, Best Acc=0.4885]Optimizing Pipeline:  60%|######    | 6/10 [00:18<00:16,  4.11s/it, Best Acc=0.4885]Optimizing Pipeline:  60%|######    | 6/10 [00:18<00:16,  4.11s/it, Best Acc=0.5160]Optimizing Pipeline:  70%|#######   | 7/10 [00:19<00:09,  3.09s/it, Best Acc=0.5160]Optimizing Pipeline:  70%|#######   | 7/10 [00:19<00:09,  3.09s/it, Best Acc=0.5160]Optimizing Pipeline:  80%|########  | 8/10 [00:49<00:23, 11.68s/it, Best Acc=0.5160]Optimizing Pipeline:  80%|########  | 8/10 [00:49<00:23, 11.68s/it, Best Acc=0.5160]Optimizing Pipeline:  90%|######### | 9/10 [00:57<00:10, 10.60s/it, Best Acc=0.5160]Optimizing Pipeline:  90%|######### | 9/10 [00:57<00:10, 10.60s/it, Best Acc=0.5240]Optimizing Pipeline: 100%|##########| 10/10 [01:07<00:00, 10.20s/it, Best Acc=0.5240]Optimizing Pipeline: 100%|##########| 10/10 [01:07<00:00, 10.20s/it, Best Acc=0.5240]Optimizing Pipeline: 100%|##########| 10/10 [01:07<00:00,  6.71s/it, Best Acc=0.5240]
+

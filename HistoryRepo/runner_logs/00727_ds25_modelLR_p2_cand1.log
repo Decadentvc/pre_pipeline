@@ -1,0 +1,32 @@
+
+--- LOG at 2025-11-19T02:03:03.485779 ---
+STDOUT:
+
+--- Optimize: Model=LR | Steps=impute->encode->normalize->features->discretize->rebalance ---
+
+⚠️ Trial 0 failed inside subprocess: Input X contains NaN.
+Binarizer does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values
+
+⚠️ Trial 2 failed inside subprocess: Input X contains NaN.
+KBinsDiscretizer does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values
+
+⚠️ Trial 3 failed inside subprocess: Found array with 0 sample(s) (shape=(0, 44)) while a minimum of 1 is required by BayesianRidge.
+
+⚠️ Trial 5 failed inside subprocess: Input X contains NaN.
+KBinsDiscretizer does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values
+
+⏱️ Trial 6 timed out after 30 seconds and was terminated.
+
+⏱️ Trial 7 timed out after 30 seconds and was terminated.
+
+⏱️ Trial 8 timed out after 30 seconds and was terminated.
+
+⚠️ Trial 9 failed inside subprocess: Found array with 0 sample(s) (shape=(0, 44)) while a minimum of 1 is required by BayesianRidge.
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:00<00:00, 26.29it/s, Best Acc=0.0000]Optimizing Pipeline:  20%|##        | 2/10 [00:00<00:00,  8.66it/s, Best Acc=0.0000]Optimizing Pipeline:  20%|##        | 2/10 [00:00<00:00,  8.66it/s, Best Acc=0.7208]Optimizing Pipeline:  30%|###       | 3/10 [00:00<00:00,  8.66it/s, Best Acc=0.7208]Optimizing Pipeline:  40%|####      | 4/10 [00:08<00:15,  2.51s/it, Best Acc=0.7208]Optimizing Pipeline:  40%|####      | 4/10 [00:08<00:15,  2.51s/it, Best Acc=0.7208]Optimizing Pipeline:  50%|#####     | 5/10 [00:08<00:09,  1.86s/it, Best Acc=0.7208]Optimizing Pipeline:  50%|#####     | 5/10 [00:08<00:09,  1.86s/it, Best Acc=0.7208]Optimizing Pipeline:  60%|######    | 6/10 [00:08<00:07,  1.86s/it, Best Acc=0.7208]Optimizing Pipeline:  70%|#######   | 7/10 [00:39<00:23,  7.91s/it, Best Acc=0.7208]Optimizing Pipeline:  70%|#######   | 7/10 [00:39<00:23,  7.91s/it, Best Acc=0.7208]Optimizing Pipeline:  80%|########  | 8/10 [01:09<00:26, 13.37s/it, Best Acc=0.7208]Optimizing Pipeline:  80%|########  | 8/10 [01:09<00:26, 13.37s/it, Best Acc=0.7208]Optimizing Pipeline:  90%|######### | 9/10 [01:39<00:17, 17.72s/it, Best Acc=0.7208]Optimizing Pipeline:  90%|######### | 9/10 [01:39<00:17, 17.72s/it, Best Acc=0.7208]Optimizing Pipeline: 100%|##########| 10/10 [01:39<00:00, 17.72s/it, Best Acc=0.7208]Optimizing Pipeline: 100%|##########| 10/10 [01:39<00:00,  9.92s/it, Best Acc=0.7208]
+

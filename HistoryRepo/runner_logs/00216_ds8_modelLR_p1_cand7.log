@@ -1,0 +1,13 @@
+
+--- LOG at 2025-11-13T21:18:43.685636 ---
+STDOUT:
+
+--- Optimize: Model=LR | Steps=impute->encode->features->normalize->rebalance->discretize ---
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:18<02:43, 18.16s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:18<02:43, 18.16s/it, Best Acc=0.5000]Optimizing Pipeline:  20%|##        | 2/10 [00:18<02:25, 18.16s/it, Best Acc=0.5312]Optimizing Pipeline:  30%|###       | 3/10 [00:18<00:33,  4.82s/it, Best Acc=0.5312]Optimizing Pipeline:  30%|###       | 3/10 [00:18<00:33,  4.82s/it, Best Acc=0.5312]Optimizing Pipeline:  40%|####      | 4/10 [00:31<00:45,  7.59s/it, Best Acc=0.5312]Optimizing Pipeline:  40%|####      | 4/10 [00:31<00:45,  7.59s/it, Best Acc=0.5312]Optimizing Pipeline:  50%|#####     | 5/10 [00:31<00:25,  5.19s/it, Best Acc=0.5312]Optimizing Pipeline:  50%|#####     | 5/10 [00:31<00:25,  5.19s/it, Best Acc=0.5312]Optimizing Pipeline:  60%|######    | 6/10 [00:31<00:20,  5.19s/it, Best Acc=0.5312]Optimizing Pipeline:  70%|#######   | 7/10 [00:31<00:08,  2.70s/it, Best Acc=0.5312]Optimizing Pipeline:  70%|#######   | 7/10 [00:31<00:08,  2.70s/it, Best Acc=0.5312]Optimizing Pipeline:  80%|########  | 8/10 [00:31<00:05,  2.70s/it, Best Acc=0.5312]Optimizing Pipeline:  90%|######### | 9/10 [00:31<00:01,  1.63s/it, Best Acc=0.5312]Optimizing Pipeline:  90%|######### | 9/10 [00:31<00:01,  1.63s/it, Best Acc=0.5312]Optimizing Pipeline: 100%|##########| 10/10 [00:32<00:00,  1.63s/it, Best Acc=0.5312]Optimizing Pipeline: 100%|##########| 10/10 [00:32<00:00,  3.20s/it, Best Acc=0.5312]
+

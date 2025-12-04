@@ -55,11 +55,11 @@ def get_param_sets(model_type: str):
         ]
     elif model_type == "LR":
         return [
-            {'penalty': 'l1', 'C': 0.01, 'solver': 'liblinear', 'multi_class': 'ovr', 'max_iter': 500},
-            {'penalty': 'l2', 'C': 0.1, 'solver': 'lbfgs', 'multi_class': 'multinomial', 'max_iter': 500},
-            {'penalty': 'elasticnet', 'C': 1.0, 'solver': 'saga', 'multi_class': 'ovr', 'l1_ratio': 0.5, 'max_iter': 500},
-            {'penalty': None, 'C': 10.0, 'solver': 'newton-cg', 'multi_class': 'multinomial', 'max_iter': 500},
-            {'penalty': 'l2', 'C': 100.0, 'solver': 'sag', 'multi_class': 'ovr', 'max_iter': 500}
+            {'penalty': 'l1', 'C': 0.01, 'solver': 'liblinear', 'multi_class': 'ovr', 'max_iter': 300},
+            {'penalty': 'l2', 'C': 0.1, 'solver': 'lbfgs', 'multi_class': 'multinomial', 'max_iter': 300},
+            {'penalty': 'elasticnet', 'C': 1.0, 'solver': 'saga', 'multi_class': 'ovr', 'l1_ratio': 0.5, 'max_iter': 100},
+            {'penalty': None, 'C': 10.0, 'solver': 'newton-cg', 'multi_class': 'multinomial', 'max_iter': 100},
+            {'penalty': 'l2', 'C': 100.0, 'solver': 'sag', 'multi_class': 'ovr', 'max_iter': 100}
         ]
     elif model_type == "RF":
         return [

@@ -1,0 +1,34 @@
+
+--- LOG at 2025-11-19T01:25:10.984564 ---
+STDOUT:
+
+--- Optimize: Model=KNN | Steps=impute->encode->normalize->features->discretize->rebalance ---
+
+⚠️ Trial 0 failed inside subprocess: Input X contains NaN.
+KBinsDiscretizer does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values
+
+⚠️ Trial 1 failed inside subprocess: Input X contains NaN.
+KBinsDiscretizer does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values
+
+⚠️ Trial 2 failed inside subprocess: Found array with 0 sample(s) (shape=(0, 44)) while a minimum of 1 is required by BayesianRidge.
+
+⚠️ Trial 3 failed inside subprocess: Input X contains NaN.
+PCA does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values
+
+⚠️ Trial 4 failed inside subprocess: Input X contains NaN.
+Binarizer does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values
+
+⏱️ Trial 5 timed out after 30 seconds and was terminated.
+
+⚠️ Trial 8 failed inside subprocess: Input X contains NaN.
+Binarizer does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values
+
+⏱️ Trial 9 timed out after 30 seconds and was terminated.
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:00<00:00, 26.85it/s, Best Acc=0.0000]Optimizing Pipeline:  20%|##        | 2/10 [00:00<00:00, 26.35it/s, Best Acc=0.0000]Optimizing Pipeline:  30%|###       | 3/10 [00:07<00:16,  2.42s/it, Best Acc=0.0000]Optimizing Pipeline:  30%|###       | 3/10 [00:07<00:16,  2.42s/it, Best Acc=0.0000]Optimizing Pipeline:  40%|####      | 4/10 [00:07<00:14,  2.42s/it, Best Acc=0.0000]Optimizing Pipeline:  50%|#####     | 5/10 [00:07<00:06,  1.27s/it, Best Acc=0.0000]Optimizing Pipeline:  50%|#####     | 5/10 [00:07<00:06,  1.27s/it, Best Acc=0.0000]Optimizing Pipeline:  50%|#####     | 5/10 [00:20<00:06,  1.27s/it, Best Acc=0.0000]Optimizing Pipeline:  60%|######    | 6/10 [00:37<00:34,  8.71s/it, Best Acc=0.0000]Optimizing Pipeline:  60%|######    | 6/10 [00:37<00:34,  8.71s/it, Best Acc=0.0000]Optimizing Pipeline:  70%|#######   | 7/10 [00:38<00:20,  6.76s/it, Best Acc=0.0000]Optimizing Pipeline:  70%|#######   | 7/10 [00:38<00:20,  6.76s/it, Best Acc=0.6932]Optimizing Pipeline:  80%|########  | 8/10 [00:39<00:09,  4.98s/it, Best Acc=0.6932]Optimizing Pipeline:  80%|########  | 8/10 [00:39<00:09,  4.98s/it, Best Acc=0.6932]Optimizing Pipeline:  90%|######### | 9/10 [00:39<00:04,  4.98s/it, Best Acc=0.6932]Optimizing Pipeline: 100%|##########| 10/10 [01:09<00:00,  9.44s/it, Best Acc=0.6932]Optimizing Pipeline: 100%|##########| 10/10 [01:09<00:00,  9.44s/it, Best Acc=0.6932]Optimizing Pipeline: 100%|##########| 10/10 [01:09<00:00,  6.94s/it, Best Acc=0.6932]
+

@@ -1,0 +1,19 @@
+
+--- LOG at 2025-11-14T17:35:38.538007 ---
+STDOUT:
+
+--- Optimize: Model=GBDT | Steps=impute->encode->discretize->features->normalize->rebalance ---
+
+⚠️ Trial 0 ended without result (likely killed or crashed).
+
+⚠️ Trial 2 ended without result (likely killed or crashed).
+
+⚠️ Trial 3 ended without result (likely killed or crashed).
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:11<01:42, 11.34s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:11<01:42, 11.34s/it, Best Acc=0.0000]Optimizing Pipeline:  20%|##        | 2/10 [00:28<01:57, 14.64s/it, Best Acc=0.0000]Optimizing Pipeline:  20%|##        | 2/10 [00:28<01:57, 14.64s/it, Best Acc=0.6048]Optimizing Pipeline:  30%|###       | 3/10 [00:46<01:53, 16.20s/it, Best Acc=0.6048]Optimizing Pipeline:  30%|###       | 3/10 [00:46<01:53, 16.20s/it, Best Acc=0.6048]Optimizing Pipeline:  40%|####      | 4/10 [00:53<01:16, 12.82s/it, Best Acc=0.6048]Optimizing Pipeline:  40%|####      | 4/10 [00:53<01:16, 12.82s/it, Best Acc=0.6048]Optimizing Pipeline:  50%|#####     | 5/10 [01:21<01:29, 17.97s/it, Best Acc=0.6048]Optimizing Pipeline:  50%|#####     | 5/10 [01:21<01:29, 17.97s/it, Best Acc=0.6048]Optimizing Pipeline:  50%|#####     | 5/10 [01:21<01:21, 16.29s/it, Best Acc=0.6048]
+

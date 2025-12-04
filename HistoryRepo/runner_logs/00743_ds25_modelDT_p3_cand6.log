@@ -1,0 +1,24 @@
+
+--- LOG at 2025-11-19T06:10:16.370547 ---
+STDOUT:
+
+--- Optimize: Model=DT | Steps=impute->encode->discretize->rebalance->features->normalize ---
+
+⚠️ Trial 2 failed inside subprocess: Input X contains NaN.
+Binarizer does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values
+
+⚠️ Trial 5 failed inside subprocess: Found array with 0 sample(s) (shape=(0, 44)) while a minimum of 1 is required by BayesianRidge.
+
+⚠️ Trial 6 failed inside subprocess: Found array with 0 sample(s) (shape=(0, 44)) while a minimum of 1 is required by BayesianRidge.
+
+⚠️ Trial 7 failed inside subprocess: A sparse matrix was passed, but dense data is required. Use X.toarray() to convert to a dense numpy array.
+
+⚠️ Trial 9 failed inside subprocess: Found array with 0 sample(s) (shape=(0, 44)) while a minimum of 1 is required by BayesianRidge.
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:02<00:23,  2.66s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:02<00:23,  2.66s/it, Best Acc=0.6507]Optimizing Pipeline:  20%|##        | 2/10 [00:23<01:45, 13.14s/it, Best Acc=0.6507]Optimizing Pipeline:  20%|##        | 2/10 [00:23<01:45, 13.14s/it, Best Acc=0.7018]Optimizing Pipeline:  30%|###       | 3/10 [00:23<01:31, 13.14s/it, Best Acc=0.7018]Optimizing Pipeline:  40%|####      | 4/10 [00:25<00:33,  5.65s/it, Best Acc=0.7018]Optimizing Pipeline:  40%|####      | 4/10 [00:25<00:33,  5.65s/it, Best Acc=0.7018]Optimizing Pipeline:  50%|#####     | 5/10 [00:55<01:05, 13.16s/it, Best Acc=0.7018]Optimizing Pipeline:  50%|#####     | 5/10 [00:55<01:05, 13.16s/it, Best Acc=0.7216]Optimizing Pipeline:  60%|######    | 6/10 [00:55<00:52, 13.16s/it, Best Acc=0.7216]Optimizing Pipeline:  70%|#######   | 7/10 [00:57<00:22,  7.35s/it, Best Acc=0.7216]Optimizing Pipeline:  70%|#######   | 7/10 [00:57<00:22,  7.35s/it, Best Acc=0.7216]Optimizing Pipeline:  80%|########  | 8/10 [00:57<00:11,  5.53s/it, Best Acc=0.7216]Optimizing Pipeline:  80%|########  | 8/10 [00:57<00:11,  5.53s/it, Best Acc=0.7216]Optimizing Pipeline:  90%|######### | 9/10 [00:58<00:04,  4.46s/it, Best Acc=0.7216]Optimizing Pipeline:  90%|######### | 9/10 [00:58<00:04,  4.46s/it, Best Acc=0.7216]Optimizing Pipeline: 100%|##########| 10/10 [01:07<00:00,  5.72s/it, Best Acc=0.7216]Optimizing Pipeline: 100%|##########| 10/10 [01:07<00:00,  5.72s/it, Best Acc=0.7216]Optimizing Pipeline: 100%|##########| 10/10 [01:07<00:00,  6.76s/it, Best Acc=0.7216]
+

@@ -1,0 +1,13 @@
+
+--- LOG at 2025-11-20T17:56:57.825915 ---
+STDOUT:
+
+--- Optimize: Model=GBDT | Steps=impute->encode->normalize->rebalance->discretize->features ---
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:01<00:10,  1.18s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:01<00:10,  1.18s/it, Best Acc=0.7638]Optimizing Pipeline:  20%|##        | 2/10 [00:02<00:11,  1.40s/it, Best Acc=0.7638]Optimizing Pipeline:  20%|##        | 2/10 [00:02<00:11,  1.40s/it, Best Acc=0.7638]Optimizing Pipeline:  30%|###       | 3/10 [00:31<01:37, 13.93s/it, Best Acc=0.7638]Optimizing Pipeline:  30%|###       | 3/10 [00:31<01:37, 13.93s/it, Best Acc=0.8643]Optimizing Pipeline:  40%|####      | 4/10 [00:33<00:55,  9.31s/it, Best Acc=0.8643]Optimizing Pipeline:  40%|####      | 4/10 [00:33<00:55,  9.31s/it, Best Acc=0.8643]Optimizing Pipeline:  50%|#####     | 5/10 [00:42<00:45,  9.14s/it, Best Acc=0.8643]Optimizing Pipeline:  50%|#####     | 5/10 [00:42<00:45,  9.14s/it, Best Acc=0.8643]Optimizing Pipeline:  60%|######    | 6/10 [00:47<00:30,  7.68s/it, Best Acc=0.8643]Optimizing Pipeline:  60%|######    | 6/10 [00:47<00:30,  7.68s/it, Best Acc=0.8643]Optimizing Pipeline:  70%|#######   | 7/10 [00:50<00:18,  6.25s/it, Best Acc=0.8643]Optimizing Pipeline:  70%|#######   | 7/10 [00:50<00:18,  6.25s/it, Best Acc=0.8643]Optimizing Pipeline:  80%|########  | 8/10 [00:56<00:12,  6.03s/it, Best Acc=0.8643]Optimizing Pipeline:  80%|########  | 8/10 [00:56<00:12,  6.03s/it, Best Acc=0.8643]Optimizing Pipeline:  90%|######### | 9/10 [00:59<00:05,  5.16s/it, Best Acc=0.8643]Optimizing Pipeline:  90%|######### | 9/10 [00:59<00:05,  5.16s/it, Best Acc=0.8643]Optimizing Pipeline: 100%|##########| 10/10 [01:00<00:00,  3.85s/it, Best Acc=0.8643]Optimizing Pipeline: 100%|##########| 10/10 [01:00<00:00,  3.85s/it, Best Acc=0.8643]Optimizing Pipeline: 100%|##########| 10/10 [01:00<00:00,  6.05s/it, Best Acc=0.8643]
+

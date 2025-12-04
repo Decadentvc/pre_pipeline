@@ -1,0 +1,32 @@
+
+--- LOG at 2025-11-21T18:50:51.841450 ---
+STDOUT:
+
+--- Optimize: Model=GBDT | Steps=impute->encode->normalize->features->rebalance->discretize ---
+
+⚠️ Trial 2 failed inside subprocess: PCA does not support sparse input. See TruncatedSVD for a possible alternative.
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:04<00:44,  4.94s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:04<00:44,  4.94s/it, Best Acc=0.6867]Optimizing Pipeline:  20%|##        | 2/10 [00:13<00:55,  6.98s/it, Best Acc=0.6867]Optimizing Pipeline:  20%|##        | 2/10 [00:13<00:55,  6.98s/it, Best Acc=0.6867]Optimizing Pipeline:  30%|###       | 3/10 [00:17<00:38,  5.54s/it, Best Acc=0.6867]Optimizing Pipeline:  30%|###       | 3/10 [00:17<00:38,  5.54s/it, Best Acc=0.6867]Optimizing Pipeline:  40%|####      | 4/10 [00:29<00:49,  8.30s/it, Best Acc=0.6867]Optimizing Pipeline:  40%|####      | 4/10 [00:29<00:49,  8.30s/it, Best Acc=0.6867]Optimizing Pipeline:  50%|#####     | 5/10 [00:47<00:59, 11.88s/it, Best Acc=0.6867]Optimizing Pipeline:  50%|#####     | 5/10 [00:47<00:59, 11.88s/it, Best Acc=0.6867]Optimizing Pipeline:  60%|######    | 6/10 [00:59<00:47, 11.82s/it, Best Acc=0.6867]Optimizing Pipeline:  60%|######    | 6/10 [00:59<00:47, 11.82s/it, Best Acc=0.7154]Optimizing Pipeline:  70%|#######   | 7/10 [01:09<00:33, 11.21s/it, Best Acc=0.7154]Optimizing Pipeline:  70%|#######   | 7/10 [01:09<00:33, 11.21s/it, Best Acc=0.7620]Optimizing Pipeline:  80%|########  | 8/10 [01:10<00:15,  7.94s/it, Best Acc=0.7620]Optimizing Pipeline:  80%|########  | 8/10 [01:10<00:15,  7.94s/it, Best Acc=0.7785]Optimizing Pipeline:  90%|######### | 9/10 [01:13<00:06,  6.42s/it, Best Acc=0.7785]Optimizing Pipeline:  90%|######### | 9/10 [01:13<00:06,  6.42s/it, Best Acc=0.8316]Optimizing Pipeline: 100%|##########| 10/10 [01:15<00:00,  5.17s/it, Best Acc=0.8316]Optimizing Pipeline: 100%|##########| 10/10 [01:15<00:00,  5.17s/it, Best Acc=0.8316]Optimizing Pipeline: 100%|##########| 10/10 [01:15<00:00,  7.60s/it, Best Acc=0.8316]
+
+
+--- LOG at 2025-11-21T19:56:02.779065 ---
+STDOUT:
+
+--- Optimize: Model=GBDT | Steps=impute->encode->normalize->features->rebalance->discretize ---
+
+⚠️ Trial 2 failed inside subprocess: n_components=4 must be between 0 and min(n_samples, n_features)=3 with svd_solver='full'
+
+⚠️ Trial 8 failed inside subprocess: k should be <= n_features = 3; got 4. Use k='all' to return all features.
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:01<00:11,  1.27s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:01<00:11,  1.27s/it, Best Acc=0.6982]Optimizing Pipeline:  20%|##        | 2/10 [00:02<00:10,  1.31s/it, Best Acc=0.6982]Optimizing Pipeline:  20%|##        | 2/10 [00:02<00:10,  1.31s/it, Best Acc=0.6982]Optimizing Pipeline:  30%|###       | 3/10 [00:02<00:05,  1.27it/s, Best Acc=0.6982]Optimizing Pipeline:  30%|###       | 3/10 [00:02<00:05,  1.27it/s, Best Acc=0.6982]Optimizing Pipeline:  40%|####      | 4/10 [00:04<00:06,  1.09s/it, Best Acc=0.6982]Optimizing Pipeline:  40%|####      | 4/10 [00:04<00:06,  1.09s/it, Best Acc=0.6982]Optimizing Pipeline:  50%|#####     | 5/10 [00:04<00:04,  1.22it/s, Best Acc=0.6982]Optimizing Pipeline:  50%|#####     | 5/10 [00:04<00:04,  1.22it/s, Best Acc=0.6982]Optimizing Pipeline:  60%|######    | 6/10 [00:05<00:03,  1.20it/s, Best Acc=0.6982]Optimizing Pipeline:  60%|######    | 6/10 [00:05<00:03,  1.20it/s, Best Acc=0.6982]Optimizing Pipeline:  70%|#######   | 7/10 [00:07<00:03,  1.20s/it, Best Acc=0.6982]Optimizing Pipeline:  70%|#######   | 7/10 [00:07<00:03,  1.20s/it, Best Acc=0.6982]Optimizing Pipeline:  80%|########  | 8/10 [00:07<00:01,  1.06it/s, Best Acc=0.6982]Optimizing Pipeline:  80%|########  | 8/10 [00:07<00:01,  1.06it/s, Best Acc=0.7147]Optimizing Pipeline:  90%|######### | 9/10 [00:08<00:00,  1.45it/s, Best Acc=0.7147]Optimizing Pipeline:  90%|######### | 9/10 [00:08<00:00,  1.45it/s, Best Acc=0.7147]Optimizing Pipeline: 100%|##########| 10/10 [00:08<00:00,  1.37it/s, Best Acc=0.7147]Optimizing Pipeline: 100%|##########| 10/10 [00:08<00:00,  1.37it/s, Best Acc=0.7147]Optimizing Pipeline: 100%|##########| 10/10 [00:08<00:00,  1.13it/s, Best Acc=0.7147]
+

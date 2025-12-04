@@ -1,0 +1,29 @@
+
+--- LOG at 2025-11-19T02:25:01.510382 ---
+STDOUT:
+
+--- Optimize: Model=LR | Steps=impute->encode->normalize->rebalance->features->discretize ---
+
+⚠️ Trial 0 failed inside subprocess: Input X contains NaN.
+SelectKBest does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values
+
+⚠️ Trial 1 failed inside subprocess: Input X contains NaN.
+PCA does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values
+
+⏱️ Trial 2 timed out after 30 seconds and was terminated.
+
+⏱️ Trial 4 timed out after 30 seconds and was terminated.
+
+⚠️ Trial 6 failed inside subprocess: Input X contains NaN.
+LogisticRegression does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values
+
+⚠️ Trial 9 failed inside subprocess: Input X contains NaN.
+SelectKBest does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:02<00:23,  2.57s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:02<00:23,  2.57s/it, Best Acc=0.0000]Optimizing Pipeline:  20%|##        | 2/10 [00:04<00:17,  2.19s/it, Best Acc=0.0000]Optimizing Pipeline:  20%|##        | 2/10 [00:04<00:17,  2.19s/it, Best Acc=0.0000]Optimizing Pipeline:  30%|###       | 3/10 [00:34<01:44, 14.92s/it, Best Acc=0.0000]Optimizing Pipeline:  30%|###       | 3/10 [00:34<01:44, 14.92s/it, Best Acc=0.0000]Optimizing Pipeline:  40%|####      | 4/10 [00:56<01:45, 17.65s/it, Best Acc=0.0000]Optimizing Pipeline:  40%|####      | 4/10 [00:56<01:45, 17.65s/it, Best Acc=0.2896]Optimizing Pipeline:  50%|#####     | 5/10 [01:26<01:50, 22.13s/it, Best Acc=0.2896]Optimizing Pipeline:  50%|#####     | 5/10 [01:26<01:50, 22.13s/it, Best Acc=0.2896]Optimizing Pipeline:  60%|######    | 6/10 [01:29<01:02, 15.59s/it, Best Acc=0.2896]Optimizing Pipeline:  60%|######    | 6/10 [01:29<01:02, 15.59s/it, Best Acc=0.4318]Optimizing Pipeline:  70%|#######   | 7/10 [01:29<00:46, 15.59s/it, Best Acc=0.4318]Optimizing Pipeline:  80%|########  | 8/10 [01:33<00:17,  8.97s/it, Best Acc=0.4318]Optimizing Pipeline:  80%|########  | 8/10 [01:33<00:17,  8.97s/it, Best Acc=0.4318]Optimizing Pipeline:  90%|######### | 9/10 [01:57<00:12, 12.72s/it, Best Acc=0.4318]Optimizing Pipeline:  90%|######### | 9/10 [01:57<00:12, 12.72s/it, Best Acc=0.7208]Optimizing Pipeline: 100%|##########| 10/10 [02:00<00:00, 10.10s/it, Best Acc=0.7208]Optimizing Pipeline: 100%|##########| 10/10 [02:00<00:00, 10.10s/it, Best Acc=0.7208]Optimizing Pipeline: 100%|##########| 10/10 [02:00<00:00, 12.01s/it, Best Acc=0.7208]
+

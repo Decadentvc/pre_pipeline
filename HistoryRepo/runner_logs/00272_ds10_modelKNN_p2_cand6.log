@@ -1,0 +1,27 @@
+
+--- LOG at 2025-11-14T02:08:19.943276 ---
+STDOUT:
+
+--- Optimize: Model=KNN | Steps=impute->encode->discretize->rebalance->features->normalize ---
+
+⚠️ Trial 1 failed inside subprocess: Unable to allocate 34.2 GiB for an array with shape (66666, 68784) and data type float64
+
+⚠️ Trial 3 failed inside subprocess: Unable to allocate 34.2 GiB for an array with shape (66666, 68784) and data type float64
+
+⚠️ Trial 4 failed inside subprocess: Unable to allocate 34.2 GiB for an array with shape (66666, 68784) and data type float64
+
+⚠️ Trial 5 failed inside subprocess: Unable to allocate 34.2 GiB for an array with shape (66666, 68784) and data type float64
+
+⚠️ Trial 6 failed inside subprocess: Unable to allocate 34.2 GiB for an array with shape (66666, 68784) and data type float64
+
+⚠️ Trial 8 failed inside subprocess: Unable to allocate 34.2 GiB for an array with shape (66666, 68784) and data type float64
+
+⚠️ Trial 9 failed inside subprocess: Unable to allocate 34.2 GiB for an array with shape (66666, 68784) and data type float64
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:03<00:35,  3.95s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:03<00:35,  3.95s/it, Best Acc=0.3021]Optimizing Pipeline:  20%|##        | 2/10 [00:04<00:13,  1.70s/it, Best Acc=0.3021]Optimizing Pipeline:  20%|##        | 2/10 [00:04<00:13,  1.70s/it, Best Acc=0.3021]Optimizing Pipeline:  30%|###       | 3/10 [00:06<00:13,  1.93s/it, Best Acc=0.3021]Optimizing Pipeline:  30%|###       | 3/10 [00:06<00:13,  1.93s/it, Best Acc=0.3021]Optimizing Pipeline:  40%|####      | 4/10 [00:07<00:10,  1.82s/it, Best Acc=0.3021]Optimizing Pipeline:  40%|####      | 4/10 [00:07<00:10,  1.82s/it, Best Acc=0.3021]Optimizing Pipeline:  50%|#####     | 5/10 [00:08<00:06,  1.21s/it, Best Acc=0.3021]Optimizing Pipeline:  50%|#####     | 5/10 [00:08<00:06,  1.21s/it, Best Acc=0.3021]Optimizing Pipeline:  60%|######    | 6/10 [00:08<00:04,  1.02s/it, Best Acc=0.3021]Optimizing Pipeline:  60%|######    | 6/10 [00:08<00:04,  1.02s/it, Best Acc=0.3021]Optimizing Pipeline:  70%|#######   | 7/10 [00:08<00:02,  1.37it/s, Best Acc=0.3021]Optimizing Pipeline:  70%|#######   | 7/10 [00:08<00:02,  1.37it/s, Best Acc=0.3021]Optimizing Pipeline:  80%|########  | 8/10 [00:10<00:02,  1.17s/it, Best Acc=0.3021]Optimizing Pipeline:  80%|########  | 8/10 [00:10<00:02,  1.17s/it, Best Acc=0.3021]Optimizing Pipeline:  90%|######### | 9/10 [00:12<00:01,  1.32s/it, Best Acc=0.3021]Optimizing Pipeline:  90%|######### | 9/10 [00:12<00:01,  1.32s/it, Best Acc=0.3021]Optimizing Pipeline: 100%|##########| 10/10 [00:13<00:00,  1.24s/it, Best Acc=0.3021]Optimizing Pipeline: 100%|##########| 10/10 [00:13<00:00,  1.24s/it, Best Acc=0.3021]Optimizing Pipeline: 100%|##########| 10/10 [00:13<00:00,  1.37s/it, Best Acc=0.3021]
+
