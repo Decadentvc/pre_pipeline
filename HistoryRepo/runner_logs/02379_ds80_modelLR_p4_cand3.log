@@ -1,0 +1,27 @@
+
+--- LOG at 2025-11-26T03:22:16.065839 ---
+STDOUT:
+
+--- Optimize: Model=LR | Steps=impute->encode->normalize->rebalance->discretize->features ---
+
+⏱️ Trial 1 timed out after 30 seconds and was terminated.
+
+⏱️ Trial 2 timed out after 30 seconds and was terminated.
+
+⏱️ Trial 4 timed out after 30 seconds and was terminated.
+
+⏱️ Trial 5 timed out after 30 seconds and was terminated.
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:04<00:44,  4.94s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:04<00:44,  4.94s/it, Best Acc=0.7118]Optimizing Pipeline:  20%|##        | 2/10 [00:35<02:37, 19.72s/it, Best Acc=0.7118]Optimizing Pipeline:  20%|##        | 2/10 [00:35<02:37, 19.72s/it, Best Acc=0.7118]Optimizing Pipeline:  30%|###       | 3/10 [01:05<02:51, 24.44s/it, Best Acc=0.7118]Optimizing Pipeline:  30%|###       | 3/10 [01:05<02:51, 24.44s/it, Best Acc=0.7118]Optimizing Pipeline:  40%|####      | 4/10 [01:06<01:32, 15.41s/it, Best Acc=0.7118]Optimizing Pipeline:  40%|####      | 4/10 [01:06<01:32, 15.41s/it, Best Acc=0.8711]Optimizing Pipeline:  50%|#####     | 5/10 [01:36<01:43, 20.70s/it, Best Acc=0.8711]Optimizing Pipeline:  50%|#####     | 5/10 [01:36<01:43, 20.70s/it, Best Acc=0.8711]Optimizing Pipeline:  60%|######    | 6/10 [02:06<01:35, 23.88s/it, Best Acc=0.8711]Optimizing Pipeline:  60%|######    | 6/10 [02:06<01:35, 23.88s/it, Best Acc=0.8711]Optimizing Pipeline:  70%|#######   | 7/10 [02:09<00:50, 16.83s/it, Best Acc=0.8711]Optimizing Pipeline:  70%|#######   | 7/10 [02:09<00:50, 16.83s/it, Best Acc=0.9488]Optimizing Pipeline:  80%|########  | 8/10 [02:10<00:23, 11.94s/it, Best Acc=0.9488]Optimizing Pipeline:  80%|########  | 8/10 [02:10<00:23, 11.94s/it, Best Acc=0.9488]Optimizing Pipeline:  90%|######### | 9/10 [02:24<00:12, 12.53s/it, Best Acc=0.9488]Optimizing Pipeline:  90%|######### | 9/10 [02:24<00:12, 12.53s/it, Best Acc=0.9488]Optimizing Pipeline: 100%|##########| 10/10 [02:49<00:00, 16.51s/it, Best Acc=0.9488]Optimizing Pipeline: 100%|##########| 10/10 [02:49<00:00, 16.51s/it, Best Acc=0.9488]Optimizing Pipeline: 100%|##########| 10/10 [02:49<00:00, 16.98s/it, Best Acc=0.9488]
+/home/hitlt24/.local/lib/python3.8/site-packages/scipy/optimize/_linesearch.py:306: LineSearchWarning: The line search algorithm did not converge
+  warn('The line search algorithm did not converge', LineSearchWarning)
+/home/hitlt24/.local/lib/python3.8/site-packages/scipy/optimize/_linesearch.py:306: LineSearchWarning: The line search algorithm did not converge
+  warn('The line search algorithm did not converge', LineSearchWarning)
+/home/hitlt24/.local/lib/python3.8/site-packages/scipy/optimize/_linesearch.py:306: LineSearchWarning: The line search algorithm did not converge
+  warn('The line search algorithm did not converge', LineSearchWarning)
+

@@ -1,0 +1,19 @@
+
+--- LOG at 2025-11-23T12:22:53.495449 ---
+STDOUT:
+
+--- Optimize: Model=SVM | Steps=impute->encode->rebalance->discretize->features->normalize ---
+
+⚠️ Trial 2 failed inside subprocess: Cannot center sparse matrices: pass `with_mean=False` instead. See docstring for motivation and alternatives.
+
+⏱️ Trial 5 timed out after 30 seconds and was terminated.
+
+⏱️ Trial 9 timed out after 30 seconds and was terminated.
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:01<00:12,  1.36s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:01<00:12,  1.36s/it, Best Acc=0.2550]Optimizing Pipeline:  20%|##        | 2/10 [00:02<00:10,  1.29s/it, Best Acc=0.2550]Optimizing Pipeline:  20%|##        | 2/10 [00:02<00:10,  1.29s/it, Best Acc=0.8650]Optimizing Pipeline:  30%|###       | 3/10 [00:03<00:07,  1.05s/it, Best Acc=0.8650]Optimizing Pipeline:  30%|###       | 3/10 [00:03<00:07,  1.05s/it, Best Acc=0.8650]Optimizing Pipeline:  40%|####      | 4/10 [00:04<00:06,  1.16s/it, Best Acc=0.8650]Optimizing Pipeline:  40%|####      | 4/10 [00:04<00:06,  1.16s/it, Best Acc=0.9275]Optimizing Pipeline:  50%|#####     | 5/10 [00:06<00:06,  1.30s/it, Best Acc=0.9275]Optimizing Pipeline:  50%|#####     | 5/10 [00:06<00:06,  1.30s/it, Best Acc=0.9275]Optimizing Pipeline:  60%|######    | 6/10 [00:36<00:44, 11.07s/it, Best Acc=0.9275]Optimizing Pipeline:  60%|######    | 6/10 [00:36<00:44, 11.07s/it, Best Acc=0.9275]Optimizing Pipeline:  70%|#######   | 7/10 [00:41<00:27,  9.05s/it, Best Acc=0.9275]Optimizing Pipeline:  70%|#######   | 7/10 [00:41<00:27,  9.05s/it, Best Acc=0.9275]Optimizing Pipeline:  80%|########  | 8/10 [00:44<00:14,  7.19s/it, Best Acc=0.9275]Optimizing Pipeline:  80%|########  | 8/10 [00:44<00:14,  7.19s/it, Best Acc=0.9275]Optimizing Pipeline:  90%|######### | 9/10 [00:45<00:05,  5.30s/it, Best Acc=0.9275]Optimizing Pipeline:  90%|######### | 9/10 [00:45<00:05,  5.30s/it, Best Acc=0.9275]Optimizing Pipeline: 100%|##########| 10/10 [01:15<00:00, 12.93s/it, Best Acc=0.9275]Optimizing Pipeline: 100%|##########| 10/10 [01:15<00:00, 12.93s/it, Best Acc=0.9275]Optimizing Pipeline: 100%|##########| 10/10 [01:15<00:00,  7.55s/it, Best Acc=0.9275]
+

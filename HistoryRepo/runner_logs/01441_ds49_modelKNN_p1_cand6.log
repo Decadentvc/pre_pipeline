@@ -1,0 +1,55 @@
+
+--- LOG at 2025-11-23T03:11:10.374845 ---
+STDOUT:
+
+--- Optimize: Model=KNN | Steps=impute->encode->discretize->rebalance->features->normalize ---
+
+⚠️ Trial 0 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 6, n_neighbors = 7
+
+⚠️ Trial 1 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 1, n_neighbors = 2
+
+⚠️ Trial 3 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 4, n_neighbors = 6
+
+⚠️ Trial 4 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 1, n_neighbors = 2
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:00<00:01,  5.00it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:00<00:01,  5.00it/s, Best Acc=0.0000]Optimizing Pipeline:  20%|##        | 2/10 [00:00<00:01,  5.00it/s, Best Acc=0.0000]Optimizing Pipeline:  30%|###       | 3/10 [00:02<00:05,  1.24it/s, Best Acc=0.0000]Optimizing Pipeline:  30%|###       | 3/10 [00:02<00:05,  1.24it/s, Best Acc=0.0138]Optimizing Pipeline:  40%|####      | 4/10 [00:05<00:10,  1.73s/it, Best Acc=0.0138]Optimizing Pipeline:  40%|####      | 4/10 [00:05<00:10,  1.73s/it, Best Acc=0.0138]Optimizing Pipeline:  50%|#####     | 5/10 [00:06<00:07,  1.48s/it, Best Acc=0.0138]Optimizing Pipeline:  50%|#####     | 5/10 [00:06<00:07,  1.48s/it, Best Acc=0.0138]Optimizing Pipeline:  60%|######    | 6/10 [00:18<00:19,  4.94s/it, Best Acc=0.0138]Optimizing Pipeline:  60%|######    | 6/10 [00:18<00:19,  4.94s/it, Best Acc=0.0306]Optimizing Pipeline:  70%|#######   | 7/10 [00:19<00:10,  3.60s/it, Best Acc=0.0306]Optimizing Pipeline:  70%|#######   | 7/10 [00:19<00:10,  3.60s/it, Best Acc=0.0306]Optimizing Pipeline:  80%|########  | 8/10 [00:21<00:06,  3.22s/it, Best Acc=0.0306]Optimizing Pipeline:  80%|########  | 8/10 [00:21<00:06,  3.22s/it, Best Acc=0.0306]Optimizing Pipeline:  90%|######### | 9/10 [00:35<00:06,  6.23s/it, Best Acc=0.0306]Optimizing Pipeline:  90%|######### | 9/10 [00:35<00:06,  6.23s/it, Best Acc=0.0306]Optimizing Pipeline: 100%|##########| 10/10 [00:35<00:00,  4.59s/it, Best Acc=0.0306]Optimizing Pipeline: 100%|##########| 10/10 [00:35<00:00,  4.59s/it, Best Acc=0.0425]Optimizing Pipeline: 100%|##########| 10/10 [00:35<00:00,  3.59s/it, Best Acc=0.0425]
+
+
+--- LOG at 2025-11-23T07:44:42.182578 ---
+STDOUT:
+
+--- Optimize: Model=KNN | Steps=impute->encode->discretize->rebalance->features->normalize ---
+
+⚠️ Trial 0 failed inside subprocess: Cannot center sparse matrices: use `with_centering=False` instead. See docstring for motivation and alternatives.
+
+⚠️ Trial 6 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 4, n_neighbors = 6
+
+⚠️ Trial 7 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 7, n_neighbors = 8
+
+⚠️ Trial 9 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 1, n_neighbors = 3
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:00<00:00, 29.41it/s, Best Acc=0.0000]Optimizing Pipeline:  20%|##        | 2/10 [00:11<00:45,  5.74s/it, Best Acc=0.0000]Optimizing Pipeline:  20%|##        | 2/10 [00:11<00:45,  5.74s/it, Best Acc=0.0078]Optimizing Pipeline:  30%|###       | 3/10 [00:20<00:50,  7.17s/it, Best Acc=0.0078]Optimizing Pipeline:  30%|###       | 3/10 [00:20<00:50,  7.17s/it, Best Acc=0.0688]Optimizing Pipeline:  40%|####      | 4/10 [00:20<00:27,  4.59s/it, Best Acc=0.0688]Optimizing Pipeline:  40%|####      | 4/10 [00:20<00:27,  4.59s/it, Best Acc=0.0688]Optimizing Pipeline:  50%|#####     | 5/10 [00:22<00:16,  3.39s/it, Best Acc=0.0688]Optimizing Pipeline:  50%|#####     | 5/10 [00:22<00:16,  3.39s/it, Best Acc=0.0688]Optimizing Pipeline:  60%|######    | 6/10 [00:22<00:09,  2.45s/it, Best Acc=0.0688]Optimizing Pipeline:  60%|######    | 6/10 [00:22<00:09,  2.45s/it, Best Acc=0.0688]Optimizing Pipeline:  70%|#######   | 7/10 [00:23<00:05,  1.93s/it, Best Acc=0.0688]Optimizing Pipeline:  70%|#######   | 7/10 [00:23<00:05,  1.93s/it, Best Acc=0.0688]Optimizing Pipeline:  80%|########  | 8/10 [00:23<00:02,  1.48s/it, Best Acc=0.0688]Optimizing Pipeline:  80%|########  | 8/10 [00:23<00:02,  1.48s/it, Best Acc=0.0688]Optimizing Pipeline:  90%|######### | 9/10 [00:39<00:05,  5.78s/it, Best Acc=0.0688]Optimizing Pipeline:  90%|######### | 9/10 [00:39<00:05,  5.78s/it, Best Acc=0.0688]Optimizing Pipeline: 100%|##########| 10/10 [00:39<00:00,  4.05s/it, Best Acc=0.0688]Optimizing Pipeline: 100%|##########| 10/10 [00:39<00:00,  4.05s/it, Best Acc=0.0688]Optimizing Pipeline: 100%|##########| 10/10 [00:39<00:00,  3.94s/it, Best Acc=0.0688]
+
+
+--- LOG at 2025-11-23T10:54:29.040904 ---
+STDOUT:
+
+--- Optimize: Model=KNN | Steps=impute->encode->discretize->rebalance->features->normalize ---
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:06<00:55,  6.18s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:06<00:55,  6.18s/it, Best Acc=0.9285]Optimizing Pipeline:  20%|##        | 2/10 [00:07<00:24,  3.04s/it, Best Acc=0.9285]Optimizing Pipeline:  20%|##        | 2/10 [00:07<00:24,  3.04s/it, Best Acc=0.9285]Optimizing Pipeline:  30%|###       | 3/10 [00:07<00:13,  1.88s/it, Best Acc=0.9285]Optimizing Pipeline:  30%|###       | 3/10 [00:07<00:13,  1.88s/it, Best Acc=0.9285]Optimizing Pipeline:  40%|####      | 4/10 [00:08<00:08,  1.46s/it, Best Acc=0.9285]Optimizing Pipeline:  40%|####      | 4/10 [00:08<00:08,  1.46s/it, Best Acc=0.9285]Optimizing Pipeline:  50%|#####     | 5/10 [00:08<00:05,  1.03s/it, Best Acc=0.9285]Optimizing Pipeline:  50%|#####     | 5/10 [00:08<00:05,  1.03s/it, Best Acc=0.9285]Optimizing Pipeline:  60%|######    | 6/10 [00:09<00:03,  1.13it/s, Best Acc=0.9285]Optimizing Pipeline:  60%|######    | 6/10 [00:09<00:03,  1.13it/s, Best Acc=0.9285]Optimizing Pipeline:  70%|#######   | 7/10 [00:13<00:06,  2.07s/it, Best Acc=0.9285]Optimizing Pipeline:  70%|#######   | 7/10 [00:13<00:06,  2.07s/it, Best Acc=0.9285]Optimizing Pipeline:  80%|########  | 8/10 [00:17<00:05,  2.74s/it, Best Acc=0.9285]Optimizing Pipeline:  80%|########  | 8/10 [00:17<00:05,  2.74s/it, Best Acc=0.9285]Optimizing Pipeline:  90%|######### | 9/10 [00:18<00:02,  2.00s/it, Best Acc=0.9285]Optimizing Pipeline:  90%|######### | 9/10 [00:18<00:02,  2.00s/it, Best Acc=0.9285]Optimizing Pipeline: 100%|##########| 10/10 [00:18<00:00,  1.53s/it, Best Acc=0.9285]Optimizing Pipeline: 100%|##########| 10/10 [00:18<00:00,  1.53s/it, Best Acc=0.9285]Optimizing Pipeline: 100%|##########| 10/10 [00:18<00:00,  1.88s/it, Best Acc=0.9285]
+
