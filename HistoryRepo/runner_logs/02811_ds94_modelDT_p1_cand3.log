@@ -1,0 +1,33 @@
+
+--- LOG at 2025-11-27T23:12:02.729600 ---
+STDOUT:
+
+--- Optimize: Model=DT | Steps=impute->encode->normalize->rebalance->discretize->features ---
+
+⚠️ Trial 0 failed inside subprocess: The target 'y' needs to have more than 1 class. Got 1 class instead
+
+⚠️ Trial 1 failed inside subprocess: The target 'y' needs to have more than 1 class. Got 1 class instead
+
+⚠️ Trial 2 failed inside subprocess: The target 'y' needs to have more than 1 class. Got 1 class instead
+
+⚠️ Trial 3 failed inside subprocess: The target 'y' needs to have more than 1 class. Got 1 class instead
+
+⚠️ Trial 4 failed inside subprocess: The target 'y' needs to have more than 1 class. Got 1 class instead
+
+⚠️ Trial 5 failed inside subprocess: The target 'y' needs to have more than 1 class. Got 1 class instead
+
+⚠️ Trial 6 failed inside subprocess: The target 'y' needs to have more than 1 class. Got 1 class instead
+
+⚠️ Trial 7 failed inside subprocess: The target 'y' needs to have more than 1 class. Got 1 class instead
+
+⚠️ Trial 8 failed inside subprocess: The target 'y' needs to have more than 1 class. Got 1 class instead
+
+⚠️ Trial 9 failed inside subprocess: The target 'y' needs to have more than 1 class. Got 1 class instead
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:01<00:10,  1.19s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:01<00:10,  1.19s/it, Best Acc=0.0000]Optimizing Pipeline:  20%|##        | 2/10 [00:02<00:08,  1.09s/it, Best Acc=0.0000]Optimizing Pipeline:  20%|##        | 2/10 [00:02<00:08,  1.09s/it, Best Acc=0.0000]Optimizing Pipeline:  30%|###       | 3/10 [00:04<00:11,  1.57s/it, Best Acc=0.0000]Optimizing Pipeline:  30%|###       | 3/10 [00:04<00:11,  1.57s/it, Best Acc=0.0000]Optimizing Pipeline:  40%|####      | 4/10 [00:04<00:06,  1.12s/it, Best Acc=0.0000]Optimizing Pipeline:  40%|####      | 4/10 [00:04<00:06,  1.12s/it, Best Acc=0.0000]Optimizing Pipeline:  50%|#####     | 5/10 [00:05<00:05,  1.13s/it, Best Acc=0.0000]Optimizing Pipeline:  50%|#####     | 5/10 [00:05<00:05,  1.13s/it, Best Acc=0.0000]Optimizing Pipeline:  60%|######    | 6/10 [00:06<00:03,  1.18it/s, Best Acc=0.0000]Optimizing Pipeline:  60%|######    | 6/10 [00:06<00:03,  1.18it/s, Best Acc=0.0000]Optimizing Pipeline:  70%|#######   | 7/10 [00:06<00:02,  1.18it/s, Best Acc=0.0000]Optimizing Pipeline:  80%|########  | 8/10 [00:08<00:01,  1.10it/s, Best Acc=0.0000]Optimizing Pipeline:  80%|########  | 8/10 [00:08<00:01,  1.10it/s, Best Acc=0.0000]Optimizing Pipeline:  90%|######### | 9/10 [00:09<00:01,  1.11s/it, Best Acc=0.0000]Optimizing Pipeline:  90%|######### | 9/10 [00:09<00:01,  1.11s/it, Best Acc=0.0000]Optimizing Pipeline: 100%|##########| 10/10 [00:11<00:00,  1.20s/it, Best Acc=0.0000]Optimizing Pipeline: 100%|##########| 10/10 [00:11<00:00,  1.20s/it, Best Acc=0.0000]Optimizing Pipeline: 100%|##########| 10/10 [00:11<00:00,  1.13s/it, Best Acc=0.0000]
+

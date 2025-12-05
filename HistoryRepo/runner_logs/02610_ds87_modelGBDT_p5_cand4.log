@@ -1,0 +1,15 @@
+
+--- LOG at 2025-11-27T01:01:13.986236 ---
+STDOUT:
+
+--- Optimize: Model=GBDT | Steps=impute->encode->normalize->rebalance->features->discretize ---
+
+⏱️ Trial 0 timed out after 30 seconds and was terminated.
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:30<04:30, 30.08s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:30<04:30, 30.08s/it, Best Acc=0.0000]Optimizing Pipeline:  10%|#         | 1/10 [01:00<09:01, 60.16s/it, Best Acc=0.0000]
+

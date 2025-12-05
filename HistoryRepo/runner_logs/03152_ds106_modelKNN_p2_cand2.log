@@ -1,0 +1,15 @@
+
+--- LOG at 2025-11-29T07:23:12.003333 ---
+STDOUT:
+
+--- Optimize: Model=KNN | Steps=impute->encode->normalize->features->rebalance->discretize ---
+
+⏱️ Trial 9 timed out after 30 seconds and was terminated.
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:12<01:49, 12.19s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:12<01:49, 12.19s/it, Best Acc=0.2334]Optimizing Pipeline:  20%|##        | 2/10 [00:14<00:49,  6.23s/it, Best Acc=0.2334]Optimizing Pipeline:  20%|##        | 2/10 [00:14<00:49,  6.23s/it, Best Acc=0.4436]Optimizing Pipeline:  30%|###       | 3/10 [00:14<00:24,  3.43s/it, Best Acc=0.4436]Optimizing Pipeline:  30%|###       | 3/10 [00:14<00:24,  3.43s/it, Best Acc=0.4436]Optimizing Pipeline:  40%|####      | 4/10 [00:16<00:16,  2.80s/it, Best Acc=0.4436]Optimizing Pipeline:  40%|####      | 4/10 [00:16<00:16,  2.80s/it, Best Acc=0.5686]Optimizing Pipeline:  50%|#####     | 5/10 [00:19<00:15,  3.05s/it, Best Acc=0.5686]Optimizing Pipeline:  50%|#####     | 5/10 [00:19<00:15,  3.05s/it, Best Acc=0.5686]Optimizing Pipeline:  60%|######    | 6/10 [00:23<00:12,  3.24s/it, Best Acc=0.5686]Optimizing Pipeline:  60%|######    | 6/10 [00:23<00:12,  3.24s/it, Best Acc=0.5686]Optimizing Pipeline:  70%|#######   | 7/10 [00:23<00:06,  2.29s/it, Best Acc=0.5686]Optimizing Pipeline:  70%|#######   | 7/10 [00:23<00:06,  2.29s/it, Best Acc=0.5686]Optimizing Pipeline:  80%|########  | 8/10 [00:34<00:09,  4.96s/it, Best Acc=0.5686]Optimizing Pipeline:  80%|########  | 8/10 [00:34<00:09,  4.96s/it, Best Acc=0.5686]Optimizing Pipeline:  90%|######### | 9/10 [00:40<00:05,  5.29s/it, Best Acc=0.5686]Optimizing Pipeline:  90%|######### | 9/10 [00:40<00:05,  5.29s/it, Best Acc=0.5686]Optimizing Pipeline: 100%|##########| 10/10 [01:10<00:00, 12.93s/it, Best Acc=0.5686]Optimizing Pipeline: 100%|##########| 10/10 [01:10<00:00, 12.93s/it, Best Acc=0.5686]Optimizing Pipeline: 100%|##########| 10/10 [01:10<00:00,  7.03s/it, Best Acc=0.5686]
+

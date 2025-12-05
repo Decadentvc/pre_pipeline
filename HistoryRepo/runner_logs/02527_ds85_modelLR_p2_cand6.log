@@ -1,0 +1,15 @@
+
+--- LOG at 2025-11-26T18:06:06.301070 ---
+STDOUT:
+
+--- Optimize: Model=LR | Steps=impute->encode->discretize->rebalance->features->normalize ---
+
+⚠️ Trial 3 failed inside subprocess: Cannot center sparse matrices: pass `with_mean=False` instead. See docstring for motivation and alternatives.
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:00<00:00, 22.26it/s, Best Acc=0.6667]Optimizing Pipeline:  20%|##        | 2/10 [00:00<00:00, 21.06it/s, Best Acc=0.6667]Optimizing Pipeline:  30%|###       | 3/10 [00:00<00:00, 21.12it/s, Best Acc=0.6667]Optimizing Pipeline:  30%|###       | 3/10 [00:00<00:00, 21.12it/s, Best Acc=0.7381]Optimizing Pipeline:  40%|####      | 4/10 [00:00<00:00, 21.12it/s, Best Acc=0.7381]Optimizing Pipeline:  50%|#####     | 5/10 [00:00<00:00, 21.12it/s, Best Acc=0.7381]Optimizing Pipeline:  60%|######    | 6/10 [00:00<00:00, 21.79it/s, Best Acc=0.7381]Optimizing Pipeline:  60%|######    | 6/10 [00:00<00:00, 21.79it/s, Best Acc=0.7476]Optimizing Pipeline:  70%|#######   | 7/10 [00:00<00:00, 21.79it/s, Best Acc=0.7476]Optimizing Pipeline:  80%|########  | 8/10 [00:01<00:00, 21.79it/s, Best Acc=0.7476]Optimizing Pipeline:  90%|######### | 9/10 [00:01<00:00,  5.96it/s, Best Acc=0.7476]Optimizing Pipeline:  90%|######### | 9/10 [00:01<00:00,  5.96it/s, Best Acc=0.7476]Optimizing Pipeline: 100%|##########| 10/10 [00:01<00:00,  5.96it/s, Best Acc=0.7476]Optimizing Pipeline: 100%|##########| 10/10 [00:01<00:00,  7.70it/s, Best Acc=0.7476]
+

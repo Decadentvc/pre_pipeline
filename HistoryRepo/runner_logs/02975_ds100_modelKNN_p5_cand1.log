@@ -1,0 +1,44 @@
+
+--- LOG at 2025-11-28T10:08:24.360795 ---
+STDOUT:
+
+--- Optimize: Model=KNN | Steps=impute->encode->normalize->features->discretize->rebalance ---
+
+⚠️ Trial 0 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 1, n_neighbors = 7
+
+⚠️ Trial 2 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 1, n_neighbors = 7
+
+⚠️ Trial 3 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 1, n_neighbors = 3
+
+⚠️ Trial 4 failed inside subprocess: Metric 'chebyshev' not valid for sparse input. Use sorted(sklearn.neighbors.VALID_METRICS_SPARSE['brute']) to get valid options. Metric can also be a callable function.
+
+⚠️ Trial 6 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 1, n_neighbors = 7
+
+⚠️ Trial 7 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 1, n_neighbors = 3
+
+⚠️ Trial 9 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 1, n_neighbors = 2
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:00<00:00, 20.69it/s, Best Acc=0.0000]Optimizing Pipeline:  20%|##        | 2/10 [00:15<01:02,  7.77s/it, Best Acc=0.0000]Optimizing Pipeline:  20%|##        | 2/10 [00:15<01:02,  7.77s/it, Best Acc=0.0647]Optimizing Pipeline:  30%|###       | 3/10 [00:15<00:32,  4.71s/it, Best Acc=0.0647]Optimizing Pipeline:  30%|###       | 3/10 [00:15<00:32,  4.71s/it, Best Acc=0.0647]Optimizing Pipeline:  40%|####      | 4/10 [00:17<00:20,  3.41s/it, Best Acc=0.0647]Optimizing Pipeline:  40%|####      | 4/10 [00:17<00:20,  3.41s/it, Best Acc=0.0647]Optimizing Pipeline:  50%|#####     | 5/10 [00:17<00:11,  2.33s/it, Best Acc=0.0647]Optimizing Pipeline:  50%|#####     | 5/10 [00:17<00:11,  2.33s/it, Best Acc=0.0647]Optimizing Pipeline:  60%|######    | 6/10 [00:17<00:06,  1.61s/it, Best Acc=0.0647]Optimizing Pipeline:  60%|######    | 6/10 [00:17<00:06,  1.61s/it, Best Acc=0.2569]Optimizing Pipeline:  70%|#######   | 7/10 [00:18<00:04,  1.46s/it, Best Acc=0.2569]Optimizing Pipeline:  70%|#######   | 7/10 [00:18<00:04,  1.46s/it, Best Acc=0.2569]Optimizing Pipeline:  80%|########  | 8/10 [00:20<00:02,  1.44s/it, Best Acc=0.2569]Optimizing Pipeline:  80%|########  | 8/10 [00:20<00:02,  1.44s/it, Best Acc=0.2569]Optimizing Pipeline:  90%|######### | 9/10 [00:34<00:05,  5.46s/it, Best Acc=0.2569]Optimizing Pipeline:  90%|######### | 9/10 [00:34<00:05,  5.46s/it, Best Acc=0.2569]Optimizing Pipeline: 100%|##########| 10/10 [00:34<00:00,  3.83s/it, Best Acc=0.2569]Optimizing Pipeline: 100%|##########| 10/10 [00:34<00:00,  3.83s/it, Best Acc=0.2569]Optimizing Pipeline: 100%|##########| 10/10 [00:34<00:00,  3.47s/it, Best Acc=0.2569]
+
+
+--- LOG at 2025-11-28T12:48:47.209535 ---
+STDOUT:
+
+--- Optimize: Model=KNN | Steps=impute->encode->normalize->features->discretize->rebalance ---
+
+⚠️ Trial 2 failed inside subprocess: Metric 'chebyshev' not valid for sparse input. Use sorted(sklearn.neighbors.VALID_METRICS_SPARSE['brute']) to get valid options. Metric can also be a callable function.
+
+⚠️ Trial 5 failed inside subprocess: PCA does not support sparse input. See TruncatedSVD for a possible alternative.
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:14<02:10, 14.50s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:14<02:10, 14.50s/it, Best Acc=0.7370]Optimizing Pipeline:  20%|##        | 2/10 [00:26<01:44, 13.11s/it, Best Acc=0.7370]Optimizing Pipeline:  20%|##        | 2/10 [00:26<01:44, 13.11s/it, Best Acc=0.7880]Optimizing Pipeline:  30%|###       | 3/10 [00:26<00:50,  7.27s/it, Best Acc=0.7880]Optimizing Pipeline:  30%|###       | 3/10 [00:26<00:50,  7.27s/it, Best Acc=0.7880]Optimizing Pipeline:  40%|####      | 4/10 [00:27<00:27,  4.57s/it, Best Acc=0.7880]Optimizing Pipeline:  40%|####      | 4/10 [00:27<00:27,  4.57s/it, Best Acc=0.8110]Optimizing Pipeline:  50%|#####     | 5/10 [00:42<00:41,  8.28s/it, Best Acc=0.8110]Optimizing Pipeline:  50%|#####     | 5/10 [00:42<00:41,  8.28s/it, Best Acc=0.8110]Optimizing Pipeline:  60%|######    | 6/10 [00:42<00:22,  5.56s/it, Best Acc=0.8110]Optimizing Pipeline:  60%|######    | 6/10 [00:42<00:22,  5.56s/it, Best Acc=0.8110]Optimizing Pipeline:  70%|#######   | 7/10 [00:57<00:25,  8.55s/it, Best Acc=0.8110]Optimizing Pipeline:  70%|#######   | 7/10 [00:57<00:25,  8.55s/it, Best Acc=0.8110]Optimizing Pipeline:  80%|########  | 8/10 [00:57<00:11,  5.87s/it, Best Acc=0.8110]Optimizing Pipeline:  80%|########  | 8/10 [00:57<00:11,  5.87s/it, Best Acc=0.8110]Optimizing Pipeline:  90%|######### | 9/10 [01:11<00:08,  8.47s/it, Best Acc=0.8110]Optimizing Pipeline:  90%|######### | 9/10 [01:11<00:08,  8.47s/it, Best Acc=0.8110]Optimizing Pipeline: 100%|##########| 10/10 [01:26<00:00, 10.43s/it, Best Acc=0.8110]Optimizing Pipeline: 100%|##########| 10/10 [01:26<00:00, 10.43s/it, Best Acc=0.8110]Optimizing Pipeline: 100%|##########| 10/10 [01:26<00:00,  8.64s/it, Best Acc=0.8110]
+
