@@ -1,0 +1,31 @@
+
+--- LOG at 2025-12-02T08:16:52.133881 ---
+STDOUT:
+
+--- Optimize: Model=GBDT | Steps=impute->encode->discretize->rebalance->features->normalize ---
+
+⏱️ Trial 1 timed out after 30 seconds and was terminated.
+
+⚠️ Trial 2 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 1, n_neighbors = 8
+
+⚠️ Trial 3 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 1, n_neighbors = 2
+
+⏱️ Trial 4 timed out after 30 seconds and was terminated.
+
+⚠️ Trial 5 failed inside subprocess: Cannot center sparse matrices: pass `with_mean=False` instead. See docstring for motivation and alternatives.
+
+⚠️ Trial 6 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 1, n_neighbors = 6
+
+⚠️ Trial 7 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 1, n_neighbors = 7
+
+⚠️ Trial 8 failed inside subprocess: A sparse matrix was passed, but dense data is required. Use X.toarray() to convert to a dense numpy array.
+
+⚠️ Trial 9 failed inside subprocess: Expected n_neighbors <= n_samples,  but n_samples = 1, n_neighbors = 7
+
+STDERR:
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+/home/hitlt24/.local/lib/python3.8/site-packages/optuna/_experimental.py:31: ExperimentalWarning: Argument ``group`` is an experimental feature. The interface can change in the future.
+  warnings.warn(
+Optimizing Pipeline:   0%|          | 0/10 [00:00<?, ?it/s]Optimizing Pipeline:  10%|#         | 1/10 [00:14<02:11, 14.62s/it]Optimizing Pipeline:  10%|#         | 1/10 [00:14<02:11, 14.62s/it, Best Acc=0.0013]Optimizing Pipeline:  20%|##        | 2/10 [00:44<03:09, 23.69s/it, Best Acc=0.0013]Optimizing Pipeline:  20%|##        | 2/10 [00:44<03:09, 23.69s/it, Best Acc=0.0013]Optimizing Pipeline:  30%|###       | 3/10 [00:44<01:30, 12.95s/it, Best Acc=0.0013]Optimizing Pipeline:  30%|###       | 3/10 [00:44<01:30, 12.95s/it, Best Acc=0.0013]Optimizing Pipeline:  40%|####      | 4/10 [00:46<00:50,  8.38s/it, Best Acc=0.0013]Optimizing Pipeline:  40%|####      | 4/10 [00:46<00:50,  8.38s/it, Best Acc=0.0013]Optimizing Pipeline:  50%|#####     | 5/10 [01:16<01:20, 16.19s/it, Best Acc=0.0013]Optimizing Pipeline:  50%|#####     | 5/10 [01:16<01:20, 16.19s/it, Best Acc=0.0013]Optimizing Pipeline:  60%|######    | 6/10 [01:16<00:42, 10.73s/it, Best Acc=0.0013]Optimizing Pipeline:  60%|######    | 6/10 [01:16<00:42, 10.73s/it, Best Acc=0.0013]Optimizing Pipeline:  70%|#######   | 7/10 [01:16<00:32, 10.73s/it, Best Acc=0.0013]Optimizing Pipeline:  80%|########  | 8/10 [01:17<00:11,  5.73s/it, Best Acc=0.0013]Optimizing Pipeline:  80%|########  | 8/10 [01:17<00:11,  5.73s/it, Best Acc=0.0013]Optimizing Pipeline:  90%|######### | 9/10 [01:17<00:04,  4.29s/it, Best Acc=0.0013]Optimizing Pipeline:  90%|######### | 9/10 [01:17<00:04,  4.29s/it, Best Acc=0.0013]Optimizing Pipeline: 100%|##########| 10/10 [01:18<00:00,  3.24s/it, Best Acc=0.0013]Optimizing Pipeline: 100%|##########| 10/10 [01:18<00:00,  3.24s/it, Best Acc=0.0013]Optimizing Pipeline: 100%|##########| 10/10 [01:18<00:00,  7.82s/it, Best Acc=0.0013]
+
