@@ -1,32 +1,35 @@
 #!/usr/bin/env python3
 import os
-import csv
-import json
 import glob
+import json
+import csv
 import time
 import traceback
+import io
+import sys
+import shutil
+import contextlib
+import threading
+import psutil
 from datetime import datetime
 from pathlib import Path
-import argparse
-import psutil
-import threading
-import io
-import contextlib
 
-import sys
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 from prototype_evaluate_duration_limit import ModelManager, EnhancedPipelineRunner
 
 
-# ---------------- 配置默认值 -----------------
-DEFAULT_DATASETS_DIR = "../datasets/dataset_csv_std_duplicate_removal"
-RERUN_CSV = "rerun_results.csv"
-LOGS_DIR = "rerun_logs"
+# ----------------- 可配置项 -----------------
+DATASETS_DIR = "../datasets/dataset_csv_std_duplicate_removal"
+OUTPUT_CSV = "evaluation_results_r.csv"
+LOGS_DIR = "runner_logs"
 TARGET_COLUMN = "label"
-N_TRIALS = 10
+N_TRIALS = 3
 CV = 3
+TRIAL_TIMEOUT = None
 
-# 每个候选 pipeline 顺序
+# candidate-level timeout 秒数
+CANDIDATE_TIMEOUT = None
+
 STEPS_ORDER_CANDIDATES = [
     (1, ['impute', 'encode', 'normalize', 'features', 'discretize', 'rebalance']),
     (2, ['impute', 'encode', 'normalize', 'features', 'rebalance', 'discretize']),
@@ -37,9 +40,17 @@ STEPS_ORDER_CANDIDATES = [
     (7, ['impute', 'encode', 'features', 'normalize', 'rebalance', 'discretize']),
     (8, ['impute', 'encode', 'rebalance', 'discretize', 'features', 'normalize']),
 ]
+# ------------------------------------------------------
+
+# ----------------- 新增：局部评估控制（在这里设置，按你的要求通过代码内变量控制） -----------------
+# 将其中一个改为整数以开启对应模式；否则设为 None
+# 注意：如果同时设置 EVALUATE_DATASET_ID 与 EVALUATE_TASK_INDEX，则以 EVALUATE_TASK_INDEX 为准（task 优先）。
+EVALUATE_DATASET_ID = 3   # 例如 3 表示只评估排序后的 dataset_paths 中第 3 个数据集（1-based）
+EVALUATE_TASK_INDEX = None   # 例如 61 表示只评估全局任务 index=61（1-based，和完整运行时 index 字段一致）
+# ----------------------------------------------------------------------------------------------------------------
 
 
-# ---------------- 模型参数集合 -----------------
+# ---------- 模型参数集合 ----------
 def get_param_sets(model_type: str):
     if model_type == "SVM":
         return [
@@ -93,17 +104,79 @@ def get_param_sets(model_type: str):
         raise ValueError(f"Unknown model type: {model_type}")
 
 
-# ---------------- 提取异常条目 -----------------
-def is_entry_abnormal(row):
-    if row["status"] != "SUCCESS":
-        return True
-    if row.get("error_message"):
-        return True
-    return False
+# ---------- 提取准确率 ----------
+def extract_accuracy_from_results(results, model_key=None):
+    try:
+        if isinstance(results, dict):
+            if "per_model_best" in results and model_key in results["per_model_best"]:
+                r = results["per_model_best"][model_key]
+                if isinstance(r, dict) and 'accuracy' in r:
+                    return float(r['accuracy'])
+            if "optimization_results" in results and isinstance(results["optimization_results"], dict):
+                if 'accuracy' in results["optimization_results"]:
+                    return float(results["optimization_results"]['accuracy'])
+            if "baseline_performance" in results and model_key in results["baseline_performance"]:
+                bp = results["baseline_performance"][model_key]
+                if isinstance(bp, dict) and 'mean_accuracy' in bp:
+                    return float(bp['mean_accuracy'])
+    except Exception:
+        pass
+    return None
 
 
-# ---------------- 静默运行 candidate -----------------
-def run_runner_silent(runner, log_path=None):
+# ---------- 安全运行一个 candidate 的评估（带超时） ----------
+def run_candidate_with_timeout(runner, model_type, log_path):
+    """
+    在独立线程中运行 run_runner_silent ，超过 CANDIDATE_TIMEOUT 秒则强制中断
+    """
+    results_container = {}
+    thread_ex = None
+
+    def target():
+        nonlocal results_container, thread_ex
+        try:
+            results, _, _ = run_runner_silent(runner, True, log_path)
+            results_container["res"] = results
+        except Exception as e:
+            thread_ex = e
+
+    t = threading.Thread(target=target, daemon=True)
+    t.start()
+    t.join(timeout=CANDIDATE_TIMEOUT)
+
+    if t.is_alive():
+        # candidate 卡死，强制终止
+        try:
+            # 杀掉所有与当前线程相关的僵尸子进程
+            parent = psutil.Process(os.getpid())
+            for child in parent.children(recursive=True):
+                if child.status() == psutil.STATUS_ZOMBIE:
+                    child.kill()
+        except Exception:
+            pass
+        # 写入日志
+        with open(log_path, "a", encoding="utf-8") as lf:
+            lf.write(f"\n--- CANDIDATE TIMEOUT after {CANDIDATE_TIMEOUT}s ---\n")
+
+        # 尝试取 runner 的 best value
+        best_acc = None
+        try:
+            if hasattr(runner, "study") and runner.study is not None and hasattr(runner.study, "best_value"):
+                best_acc = runner.study.best_value
+        except Exception:
+            pass
+
+        return best_acc, "TIMEOUT", None
+
+    if thread_ex:
+        raise thread_ex
+    results = results_container.get("res", None)
+    acc = extract_accuracy_from_results(results, model_type)
+    return acc, "SUCCESS", results
+
+
+# ---------- 静默运行 ----------
+def run_runner_silent(runner, save_logs=True, log_path=None):
     stdout_buf = io.StringIO()
     stderr_buf = io.StringIO()
     results = None
@@ -117,188 +190,415 @@ def run_runner_silent(runner, log_path=None):
     err = stderr_buf.getvalue()
     stdout_buf.close()
     stderr_buf.close()
-    if log_path:
+
+    if save_logs and log_path:
         Path(log_path).parent.mkdir(parents=True, exist_ok=True)
-        with open(log_path, "a", encoding="utf-8") as f:
-            f.write(f"\n--- LOG at {datetime.utcnow().isoformat()} ---\n")
-            if out: f.write("STDOUT:\n" + out + "\n")
-            if err: f.write("STDERR:\n" + err + "\n")
+        with open(log_path, "a", encoding="utf-8") as lf:
+            lf.write(f"\n--- LOG at {datetime.utcnow().isoformat()} ---\n")
+            if out:
+                lf.write("STDOUT:\n" + out + "\n")
+            if err:
+                lf.write("STDERR:\n" + err + "\n")
+
     if exc:
         exc.captured_stdout = out
         exc.captured_stderr = err
         raise exc
-    return results
+
+    return results, out, err
 
 
-# ---------------- 安全运行 candidate（无超时） -----------------
-def run_candidate(runner, model_type, log_path):
-    try:
-        results = run_runner_silent(runner, log_path)
-        acc = None
-        if isinstance(results, dict):
-            # 尝试从各种位置提取 accuracy
-            if "per_model_best" in results and model_type in results["per_model_best"]:
-                r = results["per_model_best"][model_type]
-                if isinstance(r, dict) and "accuracy" in r:
-                    acc = float(r["accuracy"])
-            elif "optimization_results" in results and isinstance(results["optimization_results"], dict):
-                if "accuracy" in results["optimization_results"]:
-                    acc = float(results["optimization_results"]["accuracy"])
-            elif "baseline_performance" in results and model_type in results["baseline_performance"]:
-                bp = results["baseline_performance"][model_type]
-                if isinstance(bp, dict) and "mean_accuracy" in bp:
-                    acc = float(bp["mean_accuracy"])
-        return acc, "SUCCESS", results
-    except Exception as e:
-        return None, f"{type(e).__name__}", None
-
-
-# ---------------- 主流程 -----------------
+# ---------- 主流程 ----------
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--datasets_dir", type=str, default=DEFAULT_DATASETS_DIR)
-    parser.add_argument("--rerun_csv", type=str, default=RERUN_CSV)
-    parser.add_argument("--logs_dir", type=str, default=LOGS_DIR)
-    parser.add_argument("--n_trials", type=int, default=N_TRIALS)
-    parser.add_argument("--cv", type=int, default=CV)
-    parser.add_argument("--target_column", type=str, default=TARGET_COLUMN)
-    parser.add_argument("--max_memory_mb", type=int, default=4096)
-    parser.add_argument("--max_cpu_seconds", type=int, default=None)
-    args = parser.parse_args()
-
-    Path(args.logs_dir).mkdir(parents=True, exist_ok=True)
-
-    # 读取异常条目
-    abnormal_entries = []
-    orig_csv = "evaluation_results.csv"
-    if not os.path.exists(orig_csv):
-        print(f"ERROR: {orig_csv} not found")
+    # 保持原有 model 顺序
+    models = ["KNN", "LR", "RF", "SVM", "DT", "GBDT"]
+    dataset_paths = sorted(glob.glob(os.path.join(DATASETS_DIR, "*.csv")))
+    if not dataset_paths:
+        print(f"ERROR: no datasets found under {DATASETS_DIR}.")
         return
 
-    with open(orig_csv, "r", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            if is_entry_abnormal(row):
-                abnormal_entries.append(row)
-
-    if not abnormal_entries:
-        print("No abnormal entries found. Nothing to rerun.")
+    if EVALUATE_DATASET_ID is not None and EVALUATE_TASK_INDEX is not None:
+        print("ERROR: EVALUATE_DATASET_ID 和 EVALUATE_TASK_INDEX 不能同时使用")
         return
 
-    # 已完成的重跑条目
+    # 统一将输入转为集合
+    ds_allow_set = None
+    if isinstance(EVALUATE_DATASET_ID, int):
+        ds_allow_set = {EVALUATE_DATASET_ID}
+    elif isinstance(EVALUATE_DATASET_ID, list):
+        ds_allow_set = set(EVALUATE_DATASET_ID)
+
+    task_allow_set = None
+    if isinstance(EVALUATE_TASK_INDEX, int):
+        task_allow_set = {EVALUATE_TASK_INDEX}
+    elif isinstance(EVALUATE_TASK_INDEX, list):
+        task_allow_set = set(EVALUATE_TASK_INDEX)
+
+    Path(LOGS_DIR).mkdir(parents=True, exist_ok=True)
+    n_datasets = len(dataset_paths)
+    n_models = len(models)
+    n_param_sets = 5
+    n_candidates = len(STEPS_ORDER_CANDIDATES)
+    tasks_per_dataset = n_models * n_param_sets  # 6 * 5 = 30
+    total_tasks = n_datasets * tasks_per_dataset
+
+    # 决定输出文件名（如果是局部评估则另存）
+    global OUTPUT_CSV
+    if EVALUATE_TASK_INDEX is not None:
+        OUTPUT_CSV = f"evaluation_results_task{EVALUATE_TASK_INDEX}.csv"
+    elif EVALUATE_DATASET_ID is not None:
+        OUTPUT_CSV = f"evaluation_results_dataset{EVALUATE_DATASET_ID}.csv"
+    else:
+        OUTPUT_CSV = OUTPUT_CSV  # 保持默认
+
+    # 读取已完成集合（基于输出文件）
     completed = set()
-    if os.path.exists(args.rerun_csv):
-        with open(args.rerun_csv, "r", encoding="utf-8") as f:
+    if os.path.exists(OUTPUT_CSV):
+        with open(OUTPUT_CSV, "r", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                completed.add(int(row["index"]))
+                try:
+                    completed.add((row["dataset_name"], row["model_type"], int(row["param_set_id"])))
+                except Exception:
+                    continue
 
-    first_run = not os.path.exists(args.rerun_csv) or os.path.getsize(args.rerun_csv) == 0
-    csv_file = open(args.rerun_csv, "a", newline="", encoding="utf-8")
+    first_run = not os.path.exists(OUTPUT_CSV) or os.path.getsize(OUTPUT_CSV) == 0
+    csv_file = open(OUTPUT_CSV, "a", newline="", encoding="utf-8")
     csv_writer = csv.writer(csv_file)
     if first_run:
         csv_writer.writerow([
-            "index","timestamp_utc","dataset_id","dataset_name",
-            "model_type","param_set_id","param_json",
-            "candidate_accuracies_json","candidate_ranking_json",
-            "best_accuracy","best_candidate","best_candidate_id","accuracy_ranking",
-            "status","error_message"
+            "index", "timestamp_utc", "dataset_id", "dataset_name",
+            "model_type", "param_set_id", "param_json",
+            "candidate_accuracies_json", "candidate_ranking_json",
+            "best_accuracy", "best_candidate", "best_candidate_id", "accuracy_ranking",
+            "status", "error_message"
         ])
         csv_file.flush()
 
     mm = ModelManager()
+    # 注意：在全量运行中，task_counter 按顺序从 1 增加；在局部运行中我们需要计算正确的全局 index
+    task_counter = 0
+    start_time = time.time()
 
-    for entry in abnormal_entries:
-        idx = int(entry["index"])
-        if idx in completed:
-            continue
-        
-        print(f"Rerunning entry index {idx} ...")
-        
-        ds_name = entry["dataset_name"]
-        dataset_id = entry["dataset_id"]
-        model_type = entry["model_type"]
-        param_set_id = int(entry["param_set_id"])
-        params = get_param_sets(model_type)[param_set_id-1]
+    try:
+        # 如果指定了一个 task index（全局 index，1-based），我们定位到该任务并只运行它
+        if EVALUATE_TASK_INDEX is not None:
+            # 校验 index 范围并转换（1-based）
+            idx = int(EVALUATE_TASK_INDEX)
+            if idx < 1 or idx > total_tasks:
+                raise ValueError(f"EVALUATE_TASK_INDEX {idx} out of range (1..{total_tasks})")
+            # 计算 dataset_id（1-based）、在 dataset 内的偏移（0-based）
+            dataset_id = (idx - 1) // tasks_per_dataset + 1
+            offset_in_dataset = (idx - 1) % tasks_per_dataset  # 0..29
+            model_idx = offset_in_dataset // n_param_sets  # 0..5
+            param_set_id = (offset_in_dataset % n_param_sets) + 1  # 1..5
+            model_type = models[model_idx]
 
-        candidate_accs = {}
-        ranking = []
-        best_candidate = None
-        best_acc = None
-        best_cand_id = None
-        status = "SUCCESS"
-        error_msg = ""
+            # 获取对应的 dataset path
+            ds_idx = dataset_id
+            if ds_idx < 1 or ds_idx > n_datasets:
+                raise ValueError(f"Derived dataset_id {ds_idx} out of range")
+            ds_path = dataset_paths[ds_idx - 1]
+            ds_name = os.path.basename(ds_path)
 
-        try:
-            # 禁用其他模型，只启用当前
-            if hasattr(mm, "available_keys") and hasattr(mm, "disable"):
-                for k in mm.available_keys():
-                    mm.disable(k)
-            if hasattr(mm, "enable"):
-                mm.enable(model_type)
+            # 设置 task_counter 为该全局 index（保持与全量一致）
+            task_counter = idx
+
+            print(f"Running single task by global index {idx} -> dataset_id={dataset_id} ({ds_name}), model={model_type}, param_set_id={param_set_id}")
+
+            # 只跑这一条：构造 param_sets 并取特定 param
+            param_sets = get_param_sets(model_type)
+            # param_set_id 是 1-based
+            params = param_sets[param_set_id - 1]
+
+            # 执行这一个任务（与原代码块一致）
+            candidate_accs = {}
+            ranking_str = ""
+            ranking = []
+            best_candidate = None
+            best_acc = None
+            best_cand_id = None
+            status = "SUCCESS"
+            error_msg = ""
+
             try:
-                mm.set_model_params(model_type, **params)
-            except TypeError:
-                mm.set_model_params(model_type, params)
+                if hasattr(mm, "available_keys") and hasattr(mm, "disable"):
+                    for k in mm.available_keys():
+                        mm.disable(k)
+                if hasattr(mm, "enable"):
+                    mm.enable(model_type)
+                try:
+                    mm.set_model_params(model_type, **params)
+                except TypeError:
+                    mm.set_model_params(model_type, params)
 
-            for cand_id, steps in STEPS_ORDER_CANDIDATES:
-                ds_path_full = os.path.join(args.datasets_dir, ds_name) if args.datasets_dir else os.path.join(".", ds_name)
-                runner = EnhancedPipelineRunner(
-                    file_path=ds_path_full, target_column=args.target_column,
-                    steps_order_candidates=[steps], model_manager=mm,
-                    n_trials=args.n_trials, cv=args.cv, trial_timeout=None
-                )
-                log_fname = f"rerun_idx{idx}_model{model_type}_p{param_set_id}_cand{cand_id}.log"
-                log_path = os.path.join(args.logs_dir, log_fname)
-                acc, stat, _ = run_candidate(runner, model_type, log_path)
-                candidate_accs[str(cand_id)] = acc
-                if stat != "SUCCESS":
-                    status = stat
+                for cand_id, cand in STEPS_ORDER_CANDIDATES:
+                    runner = EnhancedPipelineRunner(
+                        file_path=ds_path, target_column=TARGET_COLUMN,
+                        steps_order_candidates=[cand], model_manager=mm,
+                        n_trials=N_TRIALS, cv=CV, trial_timeout=TRIAL_TIMEOUT
+                    )
+                    log_fname = f"{task_counter:05d}_ds{ds_idx}_model{model_type}_p{param_set_id}_cand{cand_id}.log"
+                    log_path = os.path.join(LOGS_DIR, log_fname)
 
-            # 选最优
-            valid = [(cid, a) for cid, a in candidate_accs.items() if a is not None]
-            valid.sort(key=lambda x: -x[1])
-            if valid:
-                best_cand_id, best_acc = valid[0]
-                for cid, steps in STEPS_ORDER_CANDIDATES:
-                    if str(cid) == str(best_cand_id):
-                        best_candidate = steps
-                        break
+                    try:
+                        acc, stat, _ = run_candidate_with_timeout(runner, model_type, log_path)
+                        if stat == "TIMEOUT":
+                            status = "CANDIDATE_TIMEOUT"
+                    except Exception as e:
+                        acc = None
+                        error_msg = f"{type(e).__name__}: {str(e)}"
+                    candidate_accs[str(cand_id)] = acc
 
-            # 生成排名
-            acc_dict = {}
-            for cid, acc in candidate_accs.items():
-                if acc is not None:
-                    acc_dict.setdefault(acc, []).append(cid)
-            sorted_acc = sorted(acc_dict.items(), key=lambda x: -x[0])
-            ranking_parts = []
-            for acc, cids in sorted_acc:
-                if len(cids) == 1:
-                    ranking_parts.append(str(cids[0]))
-                else:
-                    ranking_parts.append("=".join(sorted(map(str, cids))))
-            ranking_str = ">".join(ranking_parts)
-            ranking = ranking_parts
+                # 选最优
+                valid = [(cid, a) for cid, a in candidate_accs.items() if a is not None]
+                valid.sort(key=lambda x: -x[1])
+                if valid:
+                    best_cand_id, best_acc = valid[0]
+                    for cid, steps in STEPS_ORDER_CANDIDATES:
+                        if str(cid) == str(best_cand_id):
+                            best_candidate = steps
+                            break
 
-        except Exception as e:
-            status = "ERROR"
-            error_msg = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
+                acc_dict = {}
+                for cid, acc in candidate_accs.items():
+                    if acc is not None:
+                        acc_dict.setdefault(acc, []).append(cid)
+                sorted_acc = sorted(acc_dict.items(), key=lambda x: -x[0])
+                ranking_parts = []
+                for acc, cids in sorted_acc:
+                    if len(cids) == 1:
+                        ranking_parts.append(str(cids[0]))
+                    else:
+                        ranking_parts.append("=".join(sorted(map(str, cids))))
+                ranking_str = ">".join(ranking_parts)
+                ranking = ranking_parts
 
-        csv_writer.writerow([
-            idx, datetime.utcnow().isoformat(), dataset_id, ds_name,
-            model_type, param_set_id, json.dumps(params, ensure_ascii=False),
-            json.dumps(candidate_accs, ensure_ascii=False),
-            json.dumps(ranking, ensure_ascii=False),
-            best_acc if best_acc is not None else "",
-            json.dumps(best_candidate, ensure_ascii=False) if best_candidate else "",
-            best_cand_id if best_cand_id is not None else "",
-            ranking_str, status, error_msg
-        ])
-        csv_file.flush()
-        print(f"Rerun idx {idx} completed: status={status}")
+            except Exception as e:
+                status = "ERROR"
+                error_msg = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
 
-    csv_file.close()
-    print("All rerun tasks completed.")
+            csv_writer.writerow([
+                task_counter, datetime.utcnow().isoformat(), ds_idx, ds_name,
+                model_type, param_set_id, json.dumps(params, ensure_ascii=False),
+                json.dumps(candidate_accs, ensure_ascii=False),
+                json.dumps(ranking, ensure_ascii=False),
+                best_acc if best_acc is not None else "",
+                json.dumps(best_candidate, ensure_ascii=False) if best_candidate else "",
+                best_cand_id if best_cand_id is not None else "",
+                ranking_str, status, error_msg
+            ])
+            csv_file.flush()
+
+        # 否则如果指定了 dataset id（只跑该数据集下全部 30 条）
+        elif EVALUATE_DATASET_ID is not None:
+            ds_target = int(EVALUATE_DATASET_ID)
+            if ds_target < 1 or ds_target > n_datasets:
+                raise ValueError(f"EVALUATE_DATASET_ID {ds_target} out of range (1..{n_datasets})")
+
+            # 仅处理这个数据集：确定 ds_path 与 ds_idx
+            ds_idx = ds_target
+            ds_path = dataset_paths[ds_idx - 1]
+            ds_name = os.path.basename(ds_path)
+
+            print(f"Running tasks for dataset_id={ds_idx} ({ds_name}) only (all models & param sets)")
+
+            # base index for this dataset in the global ordering:
+            base_index = (ds_idx - 1) * tasks_per_dataset  # 0-based base, will add per-task offset
+            # iterate models but compute global task_counter from base_index
+            for model_idx, model_type in enumerate(models):
+                param_sets = get_param_sets(model_type)
+                for p_idx, params in enumerate(param_sets, start=1):
+                    # compute global task index:
+                    # within dataset offset (0-based) = model_idx * n_param_sets + (p_idx-1)
+                    offset_in_dataset = model_idx * n_param_sets + (p_idx - 1)
+                    task_counter = base_index + offset_in_dataset + 1  # make it 1-based
+                    # ensure same completed check semantics as original (by dataset_name,model_type,param_set_id)
+                    if (ds_name, model_type, p_idx) in completed:
+                        continue
+
+                    candidate_accs = {}
+                    ranking_str = ""
+                    ranking = []
+                    best_candidate = None
+                    best_acc = None
+                    best_cand_id = None
+                    status = "SUCCESS"
+                    error_msg = ""
+
+                    try:
+                        if hasattr(mm, "available_keys") and hasattr(mm, "disable"):
+                            for k in mm.available_keys():
+                                mm.disable(k)
+                        if hasattr(mm, "enable"):
+                            mm.enable(model_type)
+                        try:
+                            mm.set_model_params(model_type, **params)
+                        except TypeError:
+                            mm.set_model_params(model_type, params)
+
+                        for cand_id, cand in STEPS_ORDER_CANDIDATES:
+                            runner = EnhancedPipelineRunner(
+                                file_path=ds_path, target_column=TARGET_COLUMN,
+                                steps_order_candidates=[cand], model_manager=mm,
+                                n_trials=N_TRIALS, cv=CV, trial_timeout=TRIAL_TIMEOUT
+                            )
+                            log_fname = f"{task_counter:05d}_ds{ds_idx}_model{model_type}_p{p_idx}_cand{cand_id}.log"
+                            log_path = os.path.join(LOGS_DIR, log_fname)
+
+                            try:
+                                acc, stat, _ = run_candidate_with_timeout(runner, model_type, log_path)
+                                if stat == "TIMEOUT":
+                                    status = "CANDIDATE_TIMEOUT"
+                            except Exception as e:
+                                acc = None
+                                error_msg = f"{type(e).__name__}: {str(e)}"
+
+                            candidate_accs[str(cand_id)] = acc
+
+                        # 选最优
+                        valid = [(cid, a) for cid, a in candidate_accs.items() if a is not None]
+                        valid.sort(key=lambda x: -x[1])
+                        if valid:
+                            best_cand_id, best_acc = valid[0]
+                            for cid, steps in STEPS_ORDER_CANDIDATES:
+                                if str(cid) == str(best_cand_id):
+                                    best_candidate = steps
+                                    break
+
+                        acc_dict = {}
+                        for cid, acc in candidate_accs.items():
+                            if acc is not None:
+                                acc_dict.setdefault(acc, []).append(cid)
+                        sorted_acc = sorted(acc_dict.items(), key=lambda x: -x[0])
+                        ranking_parts = []
+                        for acc, cids in sorted_acc:
+                            if len(cids) == 1:
+                                ranking_parts.append(str(cids[0]))
+                            else:
+                                ranking_parts.append("=".join(sorted(map(str, cids))))
+                        ranking_str = ">".join(ranking_parts)
+                        ranking = ranking_parts
+
+                    except Exception as e:
+                        status = "ERROR"
+                        error_msg = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
+
+                    csv_writer.writerow([
+                        task_counter, datetime.utcnow().isoformat(), ds_idx, ds_name,
+                        model_type, p_idx, json.dumps(params, ensure_ascii=False),
+                        json.dumps(candidate_accs, ensure_ascii=False),
+                        json.dumps(ranking, ensure_ascii=False),
+                        best_acc if best_acc is not None else "",
+                        json.dumps(best_candidate, ensure_ascii=False) if best_candidate else "",
+                        best_cand_id if best_cand_id is not None else "",
+                        ranking_str, status, error_msg
+                    ])
+                    csv_file.flush()
+
+        # 否则执行原脚本的“全量”行为（从头到尾）
+        else:
+            task_counter = 0
+            for ds_idx, ds_path in enumerate(dataset_paths, start=1):
+
+                # 若启用 dataset 限制，则过滤掉不需要的 dataset_id
+                if ds_allow_set is not None and ds_idx not in ds_allow_set:
+                    continue
+
+                ds_name = os.path.basename(ds_path)
+                for model_type in models:
+                    param_sets = get_param_sets(model_type)
+                    for p_idx, params in enumerate(param_sets, start=1):
+                        task_counter += 1
+
+                        if task_allow_set is not None and task_counter not in task_allow_set:
+                            continue
+
+                        if (ds_name, model_type, p_idx) in completed:
+                            continue
+
+                        candidate_accs = {}
+                        ranking_str = ""
+                        ranking = []
+                        best_candidate = None
+                        best_acc = None
+                        best_cand_id = None
+                        status = "SUCCESS"
+                        error_msg = ""
+
+                        try:
+                            if hasattr(mm, "available_keys") and hasattr(mm, "disable"):
+                                for k in mm.available_keys():
+                                    mm.disable(k)
+                            if hasattr(mm, "enable"):
+                                mm.enable(model_type)
+                            try:
+                                mm.set_model_params(model_type, **params)
+                            except TypeError:
+                                mm.set_model_params(model_type, params)
+
+                            for cand_id, cand in STEPS_ORDER_CANDIDATES:
+                                runner = EnhancedPipelineRunner(
+                                    file_path=ds_path, target_column=TARGET_COLUMN,
+                                    steps_order_candidates=[cand], model_manager=mm,
+                                    n_trials=N_TRIALS, cv=CV, trial_timeout=TRIAL_TIMEOUT
+                                )
+                                log_fname = f"{task_counter:05d}_ds{ds_idx}_model{model_type}_p{p_idx}_cand{cand_id}.log"
+                                log_path = os.path.join(LOGS_DIR, log_fname)
+
+                                try:
+                                    acc, stat, _ = run_candidate_with_timeout(runner, model_type, log_path)
+                                    if stat == "TIMEOUT":
+                                        status = "CANDIDATE_TIMEOUT"
+                                except Exception as e:
+                                    acc = None
+                                    error_msg = f"{type(e).__name__}: {str(e)}"
+
+                                candidate_accs[str(cand_id)] = acc
+
+                            # 选最优
+                            valid = [(cid, a) for cid, a in candidate_accs.items() if a is not None]
+                            valid.sort(key=lambda x: -x[1])
+                            if valid:
+                                best_cand_id, best_acc = valid[0]
+                                for cid, steps in STEPS_ORDER_CANDIDATES:
+                                    if str(cid) == str(best_cand_id):
+                                        best_candidate = steps
+                                        break
+
+                            acc_dict = {}
+                            for cid, acc in candidate_accs.items():
+                                if acc is not None:
+                                    acc_dict.setdefault(acc, []).append(cid)
+                            sorted_acc = sorted(acc_dict.items(), key=lambda x: -x[0])
+                            ranking_parts = []
+                            for acc, cids in sorted_acc:
+                                if len(cids) == 1:
+                                    ranking_parts.append(str(cids[0]))
+                                else:
+                                    ranking_parts.append("=".join(sorted(map(str, cids))))
+                            ranking_str = ">".join(ranking_parts)
+                            ranking = ranking_parts
+
+                        except Exception as e:
+                            status = "ERROR"
+                            error_msg = f"{type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
+
+                        csv_writer.writerow([
+                            task_counter, datetime.utcnow().isoformat(), ds_idx, ds_name,
+                            model_type, p_idx, json.dumps(params, ensure_ascii=False),
+                            json.dumps(candidate_accs, ensure_ascii=False),
+                            json.dumps(ranking, ensure_ascii=False),
+                            best_acc if best_acc is not None else "",
+                            json.dumps(best_candidate, ensure_ascii=False) if best_candidate else "",
+                            best_cand_id if best_cand_id is not None else "",
+                            ranking_str, status, error_msg
+                        ])
+                        csv_file.flush()
+
+        print("\nAll tasks completed (mode finished).")
+    finally:
+        csv_file.close()
 
 
 if __name__ == "__main__":
