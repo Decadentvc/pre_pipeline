@@ -251,7 +251,7 @@ def main():
     print("  结果文件: enhanced_stage3_results.json")
 
     print("\n=== 阶段3结论 ===")
-    print("评估标准已改为 Top-3 命中准确率。")
+
 
 
 if __name__ == "__main__":

@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 """
-阶段1（改进版）：
-- 类别重加权
-- Label Smoothing
-- 更强特征提取器
-- 稳定训练策略
+管道推荐系统 - 阶段1修复版（基于accuracy_ranking评估）
 """
 
 import torch
@@ -13,241 +9,193 @@ import torch.optim as optim
 import numpy as np
 import pandas as pd
 import json
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.preprocessing import StandardScaler
+from sklearn.feature_selection import mutual_info_classif
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix
 import warnings
 warnings.filterwarnings('ignore')
 
-# ================== 配置 ==================
+# 系统配置
 NUM_PIPELINES = 8
-BATCH_SIZE = 64
-LEARNING_RATE = 3e-4
-EPOCHS = 400
-LABEL_SMOOTHING = 0.1
-SEED = 42
+BATCH_SIZE = 32
+LEARNING_RATE = 5e-4
+EPOCHS = 500
 
-# ================== 模型 ==================
-class StrongRecommender(nn.Module):
-    def __init__(self, input_dim, num_classes):
+# ================= ranking解析 =================
+
+def parse_ranking_sets(ranking_str):
+    """
+    将accuracy_ranking解析为 top1/top2/top3 集合
+    例如: "1=2>3=4>5>6=7=8"
+    """
+    if pd.isna(ranking_str):
+        return set(), set(), set()
+
+    groups = [g.strip() for g in str(ranking_str).split('>')]
+    parsed = []
+    for g in groups:
+        ids = [int(x)-1 for x in g.split('=') if x.strip().isdigit()]
+        parsed.append(set(ids))
+
+    top1 = parsed[0] if len(parsed) >= 1 else set()
+    top2 = set().union(*parsed[:2]) if len(parsed) >= 2 else top1
+    top3 = set().union(*parsed[:3]) if len(parsed) >= 3 else top2
+    return top1, top2, top3
+
+
+class EnhancedRecommender(nn.Module):
+    def __init__(self, input_dim, num_pipelines, hidden_dims=[128, 64, 32], dropout_rate=0.3):
         super().__init__()
-        
-        self.net = nn.Sequential(
-            nn.Linear(input_dim, 256),
-            nn.BatchNorm1d(256),
-            nn.LeakyReLU(0.1),
-            nn.Dropout(0.4),
+        layers = []
+        prev_dim = input_dim
+        for hidden_dim in hidden_dims:
+            layers.extend([
+                nn.Linear(prev_dim, hidden_dim),
+                nn.BatchNorm1d(hidden_dim),
+                nn.LeakyReLU(0.1),
+                nn.Dropout(dropout_rate)
+            ])
+            prev_dim = hidden_dim
+        self.feature_extractor = nn.Sequential(*layers)
+        self.classifier = nn.Linear(prev_dim, num_pipelines)
+        self._initialize_weights()
 
-            nn.Linear(256, 128),
-            nn.BatchNorm1d(128),
-            nn.LeakyReLU(0.1),
-            nn.Dropout(0.3),
-
-            nn.Linear(128, 64),
-            nn.BatchNorm1d(64),
-            nn.LeakyReLU(0.1),
-
-            nn.Linear(64, num_classes)
-        )
-        
-        self._init_weights()
-
-    def _init_weights(self):
-        for m in self.net:
-            if isinstance(m, nn.Linear):
-                nn.init.kaiming_normal_(m.weight, nonlinearity="leaky_relu")
-                nn.init.constant_(m.bias, 0)
+    def _initialize_weights(self):
+        for layer in self.feature_extractor:
+            if isinstance(layer, nn.Linear):
+                nn.init.kaiming_normal_(layer.weight, nonlinearity='leaky_relu')
+                nn.init.constant_(layer.bias, 0.0)
+        nn.init.xavier_normal_(self.classifier.weight)
+        nn.init.constant_(self.classifier.bias, 0.0)
 
     def forward(self, x):
-        return self.net(x)
+        return self.classifier(self.feature_extractor(x))
 
-# ================== 数据加载 ==================
-def load_data(path, nrows=5000):
-    df = pd.read_csv(path, nrows=nrows)
 
-    dcols = [c for c in df.columns if c.startswith("dataset_")]
-    mcols = [c for c in df.columns if c.startswith("model_")]
+def compute_ranking_accuracy(logits, ranking_sets):
+    """返回 top1/top2/top3 acc
+    规则：
+    - Top1: 预测第一名 ∈ 第一名并列集合
+    - Top2: 预测第一名 ∈ 前两名并列集合
+    - Top3: 预测第一名 ∈ 前三名并列集合
+    """
+    probs = torch.softmax(logits, dim=1)
+    top1_pred = torch.argmax(probs, dim=1).cpu().numpy()
 
-    df[dcols] = df[dcols].fillna(0)
-    df[mcols] = df[mcols].fillna(0)
+    correct1 = correct2 = correct3 = 0
+    for i, p in enumerate(top1_pred):
+        r1, r2, r3 = ranking_sets[i]
+        if p in r1:
+            correct1 += 1
+        if p in r2:
+            correct2 += 1
+        if p in r3:
+            correct3 += 1
 
-    Xd = df[dcols].values.astype(np.float32)
-    Xm = df[mcols].values.astype(np.float32)
+    n = len(ranking_sets)
+    return correct1/n, correct2/n, correct3/n
 
-    scaler_d = StandardScaler()
-    scaler_m = StandardScaler()
 
-    Xd = scaler_d.fit_transform(Xd)
-    Xm = scaler_m.fit_transform(Xm)
-
-    X = np.concatenate([Xd, Xm], axis=1)
-
-    y = []
-    for _, row in df.iterrows():
-        try:
-            y.append(int(row["best_candidate_id"]) - 1)
-        except:
-            y.append(0)
-
-    return X, np.array(y), dcols, mcols
-
-# ================== 采样器 ==================
-def create_balanced_loader(X, y, batch_size):
-    from torch.utils.data import DataLoader, WeightedRandomSampler, TensorDataset
-
-    class_counts = np.bincount(y)
-    class_weights = 1.0 / class_counts
-    sample_weights = class_weights[y]
-
-    sampler = WeightedRandomSampler(sample_weights, len(sample_weights), replacement=True)
-
-    dataset = TensorDataset(torch.FloatTensor(X), torch.LongTensor(y))
-    return DataLoader(dataset, batch_size=batch_size, sampler=sampler)
-
-# ================== 训练 ==================
-def train(model, train_loader, val_data, class_weights, device):
-    criterion = nn.CrossEntropyLoss(
-        weight=class_weights.to(device),
-        label_smoothing=LABEL_SMOOTHING
-    )
-    
+def train_with_enhanced_monitoring(model, train_loader, val_data, val_ranking_sets, device, epochs=200):
+    criterion = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=EPOCHS)
+    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=20, T_mult=2)
 
     X_val, y_val = val_data
-    X_val = torch.FloatTensor(X_val).to(device)
-    y_val = torch.LongTensor(y_val).to(device)
+    X_val_t = torch.FloatTensor(X_val).to(device)
+    y_val_t = torch.LongTensor(y_val).to(device)
 
-    best_acc = 0
+    best_val_acc = 0
     history = []
 
-    print("\n开始训练改进版基础推荐器...\n")
-
-    for epoch in range(EPOCHS):
+    for epoch in range(epochs):
         model.train()
-        correct, total = 0, 0
-        total_loss = 0
-
-        for xb, yb in train_loader:
-            xb, yb = xb.to(device), yb.to(device)
-
-            logits = model(xb)
+        epoch_loss = 0
+        for Xb, yb in train_loader:
+            Xb, yb = Xb.to(device), yb.to(device)
+            logits = model(Xb)
             loss = criterion(logits, yb)
-
             optimizer.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
-
-            total_loss += loss.item()
-            pred = logits.argmax(dim=1)
-            correct += (pred == yb).sum().item()
-            total += yb.size(0)
+            epoch_loss += loss.item()
 
         scheduler.step()
 
-        train_acc = correct / total
-
         model.eval()
         with torch.no_grad():
-            val_logits = model(X_val)
-            val_pred = val_logits.argmax(dim=1)
-            val_acc = (val_pred == y_val).float().mean().item()
+            val_logits = model(X_val_t)
+            val_top1, val_top2, val_top3 = compute_ranking_accuracy(val_logits, val_ranking_sets)
 
-            _, top2 = torch.topk(val_logits, 2, dim=1)
-            val_top2 = top2.eq(y_val.unsqueeze(1)).sum().item() / len(y_val)
+        history.append({"epoch":epoch+1,"val_top1":val_top1,"val_top2":val_top2,"val_top3":val_top3})
 
-        history.append({
-            "epoch": epoch + 1,
-            "train_acc": train_acc,
-            "val_acc": val_acc,
-            "val_top2": val_top2,
-            "lr": optimizer.param_groups[0]["lr"]
-        })
+        if (epoch+1)%20==0 or epoch<5:
+            print(f"Epoch {epoch+1:3d}/{epochs} | Top1:{val_top1:.4f} Top2:{val_top2:.4f} Top3:{val_top3:.4f}")
 
-        if (epoch + 1) % 20 == 0 or epoch < 5:
-            print(f"Epoch {epoch+1:3d} | "
-                  f"Train Acc: {train_acc:.4f} | "
-                  f"Val Acc: {val_acc:.4f} | "
-                  f"Top2: {val_top2:.4f}")
+        if val_top1>best_val_acc:
+            best_val_acc=val_top1
+            torch.save({'model_state_dict':model.state_dict()},'enhanced_pretrained_recommender.pth')
 
-        if val_acc > best_acc:
-            best_acc = val_acc
-            torch.save({
-                "model_state_dict": model.state_dict(),
-                "val_acc": val_acc,
-                "epoch": epoch + 1
-            }, "stage1_strong_recommender.pth")
+    return model, history
 
-    return history
 
-# ================== 评估 ==================
-def evaluate(model, X_test, y_test, device):
-    X_test = torch.FloatTensor(X_test).to(device)
-    y_test = torch.LongTensor(y_test).to(device)
-
+def diagnostic_analysis(model, X_test, ranking_sets, device):
+    X_t = torch.FloatTensor(X_test).to(device)
     model.eval()
     with torch.no_grad():
-        logits = model(X_test)
-        probs = torch.softmax(logits, dim=1)
-        preds = logits.argmax(dim=1)
+        logits = model(X_t)
+        t1,t2,t3 = compute_ranking_accuracy(logits, ranking_sets)
 
-    acc = (preds == y_test).float().mean().item()
-    conf = probs.max(dim=1)[0].mean().item()
-    cm = confusion_matrix(y_test.cpu(), preds.cpu())
+    print("\n=== Ranking评估 ===")
+    print(f"Top1 Acc: {t1:.4f}")
+    print(f"Top2 Acc: {t2:.4f}")
+    print(f"Top3 Acc: {t3:.4f}")
+    return t1,t2,t3
 
-    print("\n=== 阶段1改进版 诊断分析 ===")
-    print(f"整体准确率: {acc:.4f}")
-    print(f"平均置信度: {conf:.4f}")
 
-    for i in range(NUM_PIPELINES):
-        mask = (y_test == i)
-        if mask.sum() > 0:
-            cls_acc = (preds[mask] == y_test[mask]).float().mean().item()
-            print(f"  管道{i+1}: {cls_acc:.4f}")
-
-    return acc, cm
-
-# ================== 主函数 ==================
 def main():
-    torch.manual_seed(SEED)
-    np.random.seed(SEED)
+    torch.manual_seed(42)
+    np.random.seed(42)
+    device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"使用设备: {device}")
+    df=pd.read_csv("../HistoryRepo/history_repo_with_features.csv",nrows=5000)
 
-    X, y, dcols, mcols = load_data("../HistoryRepo/history_repo_with_meta_features.csv")
+    dcols=[c for c in df.columns if c.startswith('dataset_')]
+    mcols=[c for c in df.columns if c.startswith('model_')]
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, stratify=y, random_state=SEED
-    )
+    df[dcols]=df[dcols].fillna(0)
+    df[mcols]=df[mcols].fillna(0)
 
-    X_train, X_val, y_train, y_val = train_test_split(
-        X_train, y_train, test_size=0.125, stratify=y_train, random_state=SEED
-    )
+    Xd=StandardScaler().fit_transform(df[dcols].values.astype(np.float32))
+    Xm=StandardScaler().fit_transform(df[mcols].values.astype(np.float32))
+    X=np.concatenate([Xd,Xm],axis=1)
 
-    print(f"训练集: {len(X_train)} | 验证集: {len(X_val)} | 测试集: {len(X_test)}")
+    y_top1=(df['best_candidate_id'].astype(int)-1).values
 
-    train_loader = create_balanced_loader(X_train, y_train, BATCH_SIZE)
+    ranking_sets=[parse_ranking_sets(r) for r in df['accuracy_ranking']]
 
-    class_counts = np.bincount(y_train)
-    class_weights = torch.tensor(1.0 / class_counts, dtype=torch.float32)
-    class_weights = class_weights / class_weights.sum()
+    idx=np.arange(len(X))
+    train_idx,test_idx=train_test_split(idx,test_size=0.2,stratify=y_top1,random_state=42)
+    train_idx,val_idx=train_test_split(train_idx,test_size=0.125,stratify=y_top1[train_idx],random_state=42)
 
-    model = StrongRecommender(X.shape[1], NUM_PIPELINES).to(device)
-    print(f"模型参数量: {sum(p.numel() for p in model.parameters()):,}")
+    X_train,X_val,X_test=X[train_idx],X[val_idx],X[test_idx]
+    y_train,y_val=y_top1[train_idx],y_top1[val_idx]
 
-    history = train(model, train_loader, (X_val, y_val), class_weights, device)
+    val_ranking=[ranking_sets[i] for i in val_idx]
+    test_ranking=[ranking_sets[i] for i in test_idx]
 
-    acc, cm = evaluate(model, X_test, y_test, device)
+    train_loader=torch.utils.data.DataLoader(torch.utils.data.TensorDataset(torch.FloatTensor(X_train),torch.LongTensor(y_train)),batch_size=BATCH_SIZE,shuffle=True)
 
-    with open("stage1_improved_results.json", "w") as f:
-        json.dump({
-            "final_acc": acc,
-            "history": history[-20:]
-        }, f, indent=2)
+    model=EnhancedRecommender(X.shape[1],NUM_PIPELINES).to(device)
+    model,_=train_with_enhanced_monitoring(model,train_loader,(X_val,y_val),val_ranking,device,EPOCHS)
 
-    print("\n模型已保存为: stage1_strong_recommender.pth")
+    t1,t2,t3=diagnostic_analysis(model,X_test,test_ranking,device)
 
-if __name__ == "__main__":
+    with open('enhanced_stage1_results.json','w') as f:
+        json.dump({'top1':t1,'top2':t2,'top3':t3},f,indent=2)
+
+if __name__=='__main__':
     main()
